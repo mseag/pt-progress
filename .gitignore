@@ -1,0 +1,7 @@
+# MS Word progress reports
+*.docx
+
+# Output JSON files
+*.json
+
+
