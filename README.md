@@ -26,4 +26,4 @@ https://nodejs.org/en/download/
 ## Usage
 
 1. Run the macros in the "Progress and Planning" spreadsheet
-2. `node index.js [Paratext user name] [progress file]`
+2. `node index.js [Paratext user name] [progress file] [Paratext project path]`
