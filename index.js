@@ -4,22 +4,6 @@ const fs = require("fs");
 const xmlParser = require("xml2json");
 const vkbeautify = require("vkbeautify");
 
-// Mapping from the "Progress and Planning" phases to the Paratext phases 
-const PPToParatextPhase = new Map
-  ([['Exegesis & First Draft', 'Exegisis & First Draft'],
-    ['Team Check', 'Team Checking'],
-    ['Advisor check and back transaltion', 'Advisor check and back transaltion'],
-    ['community testing', 'Community Testing'],
-    ['Con-sultant Check', 'Consultant Check'],
-    ['Pub-lished', 'Published']]);
-
-// Mapping from Fiscal quarter to reporting month (2 digit string)
-const ReportingQuarterToMonth = new Map
-  ([['Q1', '12'],
-    ['Q2', '03'],
-    ['Q3', '06'],
-    ['Q4', '09']])
-
 function displayUsage() {
   console.info("node index.js [user name] [status file]")
   console.info("[user name] - Paratext user name that will be") 
@@ -49,17 +33,42 @@ function getBookChapterNumber(bookCode, chapter) {
   return "-1";
 }
 
+// Instead of getting current date with moment().format(), 
+// generate the reporting date which will be the 28th of the final month in the reporting quarter
+// Also assigning an arbitrary time
+function getReportingDate() {
+  // Mapping from Fiscal quarter to reporting month (2 digit string)
+  const ReportingQuarterToMonth = new Map
+    ([['Q1', '12'],
+      ['Q2', '03'],
+      ['Q3', '06'],
+      ['Q4', '09']])
+
+  const reportingTime = "09:19:56.0972475+07:00"
+
+  if (!ReportingQuarterToMonth.has(reportingQuarter)) {
+    console.error("Unable to generate reporting date for invalid reporting quarter: " + reportingQuarter)
+    process.exit(1)
+  }
+  let reportingDate = reportingYear + "-" + ReportingQuarterToMonth.get(reportingQuarter) + "-28T" + reportingTime
+  return reportingDate
+}
+
 // Update the drafting progress sections of xmlObj.
 // progressObj: object from the project reports which contains completed info
 // xmlObj: ProjectProgress.xml as an object to update
 // user: String of the user for each updated status element
 function updateDraftingProgress(progressObj, xmlObj, user) {
+  // Mapping from the "Progress and Planning" phases to the Paratext phases 
+  const PPToParatextPhase = new Map
+    ([['Exegesis & First Draft', 'Exegisis & First Draft'],
+      ['Team Check', 'Team Checking'],
+      ['Advisor check and back transaltion', 'Advisor check and back transaltion'],
+      ['community testing', 'Community Testing'],
+      ['Con-sultant Check', 'Consultant Check'],
+      ['Pub-lished', 'Published']]);
   
-  // Instead of getting current date with moment().format(), 
-  // replace the current date with the end of the reporting quarter (assume 28th of the final month in quarter)
-  // And also assigning arbitratry time
-  let reportingTime = "09:19:56.0972475+07:00"
-  let reportingDate = reportingYear + "-" + ReportingQuarterToMonth.get(reportingQuarter) + "-28T" + reportingTime
+  let reportingDate = getReportingDate();
 
   // Fill out drafting progress
   // Not using forEach to maintain context
@@ -68,44 +77,64 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
     for (let ppPhase in bookObj) {
       let paratextPhase = PPToParatextPhase.get(ppPhase);
 
-      let statusArray;
-      if (paratextPhase == "Exegisis & First Draft") {
+      let assignmentsArray, statusArray;
+      switch(paratextPhase) {
+        case "Exegisis & First Draft":
+          assignmentsArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Assignments;
+          statusArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Status;
+          break;
+        case "Team Checking":
+          continue;
+          break;
+        case "Advisor check and back transaltion":
+          continue;
+          break;
+        case "Community Testing":
+          continue;
+          break;
+        case "Consultant Check":
+          continue;
+          break;
+        case "Published":
+          continue;
+          break;
+        default:
+          console.error("Invalid translation phase: " + paratextPhase);
+          continue;
+      }
+      
+      // Update Assignments node
+      let existingIndex = assignmentsArray.findIndex(el => el.book === bookCode);
+      if (existingIndex == -1) {
+        // Add new assignment
+        let updatedAssignment = {};
+        updatedAssignment.book = bookCode;
+        assignmentsArray.push(updatedAssignment)
+      }
 
-        // Update Assignments node
-        let assignmentsArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Assignments;
-        let existingIndex = assignmentsArray.findIndex(el => el.book === bookCode);
-        if (existingIndex == -1) {
-          // Add new assignment
-          let updatedAssignment = {};
-          updatedAssignment.book = bookCode;
-          assignmentsArray.push(updatedAssignment)
-        }
+      //console.log(statusArray)
+      for (let ch=1; ch<=bookObj[ppPhase]; ch++) {
+        let bookChapterNumber = getBookChapterNumber(bookCode, ch);
+        let updatedStatus = {};
+        //let existingStatus = statusArray.find(el => el.bookChapter === bookChapterNumber);
+        let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
 
-        statusArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Status;
-        //console.log(statusArray)
-        for (let ch=1; ch<=bookObj[ppPhase]; ch++) {
-          let bookChapterNumber = getBookChapterNumber(bookCode, ch);
-          let updatedStatus = {};
-          //let existingStatus = statusArray.find(el => el.bookChapter === bookChapterNumber);
-          let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
-
-          if (existingIndex != -1) {
-            // Update existing status
-            if (statusArray[existingIndex].done != "true") {
-              statusArray[existingIndex].done = true;
-              statusArray[existingIndex].user = user;
-              statusArray[existingIndex].date = reportingDate
-            }
-          } else {
-            // Create new status
-            updatedStatus.bookChapter = bookChapterNumber;
-            updatedStatus.done = "true";
-            updatedStatus.user = user;
-            updatedStatus.date = reportingDate
-            //console.log(updatedStatus);
-
-            statusArray.push(updatedStatus);
+        if (existingIndex != -1) {
+          // Update existing status
+          if (statusArray[existingIndex].done != "true") {
+            statusArray[existingIndex].done = true;
+            statusArray[existingIndex].user = user;
+            statusArray[existingIndex].date = reportingDate
           }
+        } else {
+          // Create new status
+          updatedStatus.bookChapter = bookChapterNumber;
+          updatedStatus.done = "true";
+          updatedStatus.user = user;
+          updatedStatus.date = reportingDate
+          //console.log(updatedStatus);
+
+          statusArray.push(updatedStatus);
         }
       }
     }
@@ -167,8 +196,8 @@ let booksData = fs.readFileSync(booksFilename);
 let booksObj = JSON.parse(booksData);
 
 // TODO: Project XML path as parameter
-var data = fs.readFileSync("./ProjectProgress.xml",'utf-8');
-const xmlObj = xmlParser.toJson(data, {reversible: true, object: true})
+let projectProgressData = fs.readFileSync("./ProjectProgress.xml",'utf-8');
+const xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
 //console.log(xmlObj)
 
 updateDraftingProgress(progressObj, xmlObj, user);

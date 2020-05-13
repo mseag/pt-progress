@@ -1,5 +1,5 @@
 # pt-progress
-Utilities to transfer the "Progress" sheet in "**Planning & Progress**" Excel spreadsheet to the "**Project Progress**" in Paratext.
+Utilities to transfer the "Progress" sheet in "**Planning & Progress**" Excel spreadsheet to "**Assignments & Progress**" in Paratext.
 
 
 ## Setup
