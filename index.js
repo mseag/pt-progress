@@ -68,6 +68,14 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
       ['Con-sultant Check', 'Consultant Check'],
       ['Pub-lished', 'Published']]);
   
+  const ParatextPhaseToStageIndex = new Map
+  ([['Exegisis & First Draft', 0],
+  ['Team Checking', 1],
+  ['Advisor check and back transaltion', 2],
+  ['Community Testing', 3],
+  ['Consultant Check', 4],
+  ['Published', 5]]);
+
   let reportingDate = getReportingDate();
 
   // Fill out drafting progress
@@ -77,33 +85,18 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
     for (let ppPhase in bookObj) {
       let paratextPhase = PPToParatextPhase.get(ppPhase);
 
-      let assignmentsArray, statusArray;
-      switch(paratextPhase) {
-        case "Exegisis & First Draft":
-          assignmentsArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Assignments;
-          statusArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Status;
-          break;
-        case "Team Checking":
-          continue;
-          break;
-        case "Advisor check and back transaltion":
-          continue;
-          break;
-        case "Community Testing":
-          continue;
-          break;
-        case "Consultant Check":
-          continue;
-          break;
-        case "Published":
-          continue;
-          break;
-        default:
-          console.error("Invalid translation phase: " + paratextPhase);
-          continue;
+      let stageIndex;
+      if (!ParatextPhaseToStageIndex.has(paratextPhase)) {
+        console.error("Invalid translation phase: " + paratextPhase);
+        continue;
       }
+      stageIndex = ParatextPhaseToStageIndex.get(paratextPhase);
       
       // Update Assignments node
+      if (!Array.isArray(xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments)) {
+        xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments = [xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments];
+      }
+      let assignmentsArray = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments;
       let existingIndex = assignmentsArray.findIndex(el => el.book === bookCode);
       if (existingIndex == -1) {
         // Add new assignment
@@ -112,9 +105,21 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
         assignmentsArray.push(updatedAssignment)
       }
 
-      //console.log(statusArray)
+      // Update Status node
+      if (!Array.isArray(xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status)) {
+        xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status = [xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status];
+      }
+      let statusArray = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status;
+
       for (let ch=1; ch<=bookObj[ppPhase]; ch++) {
-        let bookChapterNumber = getBookChapterNumber(bookCode, ch);
+        let bookChapterNumber;
+        if (paratextPhase == "Published") {
+          // Publishing only deals with Chapter "0":
+          // Could optimize this to not happen for each chapter
+          bookChapterNumber = getBookChapterNumber(bookCode, 0);
+        } else {
+          bookChapterNumber = getBookChapterNumber(bookCode, ch);
+        } 
         let updatedStatus = {};
         //let existingStatus = statusArray.find(el => el.bookChapter === bookChapterNumber);
         let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
