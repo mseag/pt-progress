@@ -4,4 +4,5 @@
 # Output JSON files
 *.json
 
+node_modules/
 
