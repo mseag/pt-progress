@@ -1,11 +1,12 @@
 'use strict';
 
 const fs = require("fs");
+const path = require("path");
 const xmlParser = require("xml2json");
 const vkbeautify = require("vkbeautify");
 
 function displayUsage() {
-  console.info("node index.js [user name] [status file]")
+  console.info("node index.js [user name] [status file] [Paratext project path]")
   console.info("[user name] - Paratext user name that will be") 
   console.info("    updating the Paratext project status")
   console.info("\n")
@@ -14,6 +15,8 @@ function displayUsage() {
   console.info("    [project name]-[reporting quarter]-[reporting year] (e.g. MEP-Q2-2020.json)")
   console.info("    This file contains info of book code, translation phase, and")
   console.info("    number of chapters completed in the reporting quarter")
+  console.info("\n")
+  console.info("[Paratext project path] - path to the Paratext project")
   process.exit(1)
 }
 
@@ -146,11 +149,13 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
   }
 }
 
-
+////////////////////////////////////////////////////////////////////
 // Start
-//
+////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////
 // Get parameters
+////////////////////////////////////////////////////////////////////
 if ((process.argv.length == 3) && (process.argv[2]  == "-h" || process.argv[2] == "-?")) {
   displayUsage()
 }
@@ -177,6 +182,23 @@ if (!fs.existsSync(statusFilename)) {
   process.exit(1)
 }
 
+let projectPath;
+if (process.argv.length > 4) {
+  projectPath = process.argv[4];
+} else {
+  // Default test file
+  projectPath = "/c/My Paratext 8 Projects/MEP/"
+}
+let projectProgressFilename = path.join(projectPath, "ProjectProgress.xml");
+if (!fs.existsSync(projectProgressFilename)) {
+  console.error("Can't find Paratext file: " + projectProgressFilename);
+  process.exit(1)
+}
+
+////////////////////////////////////////////////////////////////////
+// End of parameters
+////////////////////////////////////////////////////////////////////
+
 // Determine the reporting quarter and year from the status filename
 let statusFilenameArr = statusFilename.split(/[-.]+/)
 if (statusFilenameArr.length < 4) {
@@ -200,8 +222,11 @@ if (!fs.existsSync(booksFilename)) {
 let booksData = fs.readFileSync(booksFilename);
 let booksObj = JSON.parse(booksData);
 
-// TODO: Project XML path as parameter
-let projectProgressData = fs.readFileSync("./ProjectProgress.xml",'utf-8');
+// Make a backup of existing ProjectProgress.xml file
+fs.copyFileSync(projectProgressFilename, projectProgressFilename + ".bak");
+
+// Update ProjectProgress.xml
+let projectProgressData = fs.readFileSync(projectProgressFilename,'utf-8');
 const xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
 //console.log(xmlObj)
 
@@ -217,5 +242,5 @@ updatedData = vkbeautify.xml(updatedData, 2);
 
 // xmlParser loses the XML tags so append when writing back to file
 let header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-fs.writeFileSync("./ProjectProgress.xml", header + updatedData);
+fs.writeFileSync(projectProgressFilename, header + updatedData);
 console.log();
