@@ -5,6 +5,11 @@ Utilities to transfer the "Progress" sheet in "**Planning & Progress**" Excel sp
 ## Setup
 These utilities require installing Node.js and configuring Excel.
 
+Open a command prompt to this directory and run the following:
+```
+npm install
+```
+
 ### Install Node.js
 Download and install the latest LTS for Node.js
 https://nodejs.org/en/download/
