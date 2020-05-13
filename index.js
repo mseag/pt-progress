@@ -1,11 +1,10 @@
 'use strict';
 
 const fs = require("fs");
-const moment = require("moment");
 const xmlParser = require("xml2json");
 const vkbeautify = require("vkbeautify");
 
-// Mapping from the "Progress and Planning" phases to the Paratext phases
+// Mapping from the "Progress and Planning" phases to the Paratext phases 
 const PPToParatextPhase = new Map
   ([['Exegesis & First Draft', 'Exegisis & First Draft'],
     ['Team Check', 'Team Checking'],
@@ -21,16 +20,32 @@ const ReportingQuarterToMonth = new Map
     ['Q3', '06'],
     ['Q4', '09']])
 
-    // Given a book name and chapter number, create a #-# string
-// corresponding to [Paratext book number]-[chapter number]
-// bookName - 3 character short name
+function displayUsage() {
+  console.info("node index.js [user name] [status file]")
+  console.info("[user name] - Paratext user name that will be") 
+  console.info("    updating the Paratext project status")
+  console.info("\n")
+  console.info("[status file] - JSON file created from the P&P Excel spreadsheet.")
+  console.info("    The filename should consist of")
+  console.info("    [project name]-[reporting quarter]-[reporting year] (e.g. MEP-Q2-2020.json)")
+  console.info("    This file contains info of book code, translation phase, and")
+  console.info("    number of chapters completed in the reporting quarter")
+  process.exit(1)
+}
+
+// Given a 3-character book code and chapter number, create a #-# string
+// corresponding to [Paratext book code number]-[chapter number]
+// Note: Paratext seems to use 40 for Matthew in the "Assignments and Progress" tables 
+// (vs skipping book 40)
+// bookCode - 3 character book code
 // chapter  - Integer for the chapter
-function getBookChapterNumber(shortName, chapter) {
-  if (shortName in booksObj) {
-    return booksObj[shortName].BookNum + "-" + chapter;
+function getBookChapterNumber(bookCode, chapter) {
+  if (bookCode in booksObj) {
+    return booksObj[bookCode].BookNum + "-" + chapter;
   }
 
-  // Otherwise, invalid book Name
+  // Otherwise, invalid book code
+  console.warn("Book code " + bookCode + " no found")
   return "-1";
 }
 
@@ -48,8 +63,8 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
 
   // Fill out drafting progress
   // Not using forEach to maintain context
-  for (let shortName in progressObj) {
-    let bookObj = progressObj[shortName];
+  for (let bookCode in progressObj) {
+    let bookObj = progressObj[bookCode];
     for (let ppPhase in bookObj) {
       let paratextPhase = PPToParatextPhase.get(ppPhase);
 
@@ -58,18 +73,18 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
 
         // Update Assignments node
         let assignmentsArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Assignments;
-        let existingIndex = assignmentsArray.findIndex(el => el.book === shortName);
+        let existingIndex = assignmentsArray.findIndex(el => el.book === bookCode);
         if (existingIndex == -1) {
           // Add new assignment
           let updatedAssignment = {};
-          updatedAssignment.book = shortName;
+          updatedAssignment.book = bookCode;
           assignmentsArray.push(updatedAssignment)
         }
 
         statusArray = xmlObj.ProgressInfo.Stages.Stage[0].Task.Status;
         //console.log(statusArray)
         for (let ch=1; ch<=bookObj[ppPhase]; ch++) {
-          let bookChapterNumber = getBookChapterNumber(shortName, ch);
+          let bookChapterNumber = getBookChapterNumber(bookCode, ch);
           let updatedStatus = {};
           //let existingStatus = statusArray.find(el => el.bookChapter === bookChapterNumber);
           let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
@@ -99,25 +114,36 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
 
 
 // Start
-// Usage:
-// node index.js [progress JSON file]
 //
 
-let statusFilename;
+// Get parameters
+if ((process.argv.length == 3) && (process.argv[2]  == "-h" || process.argv[2] == "-?")) {
+  displayUsage()
+}
+
+let user
 if (process.argv.length > 2) {
-  statusFilename = process.argv[2];
+  user = process.argv[2];
+} else {
+  // Default test user name
+  user = "Darcy Wong"
+}
+
+let statusFilename;
+if (process.argv.length > 3) {
+  statusFilename = process.argv[3];
 } else {
   // Default test files
   statusFilename = "MEP-Q2-2020.json"
 }
 
-console.log("Processing status file: " + statusFilename);
+console.log("User: \"" + user + "\" processing status file: " + statusFilename);
 if (!fs.existsSync(statusFilename)) {
   console.error("Can't open status file " + statusFilename)
   process.exit(1)
 }
 
-// Determine the reporting quarter and year from the filename
+// Determine the reporting quarter and year from the status filename
 let statusFilenameArr = statusFilename.split(/[-.]+/)
 if (statusFilenameArr.length < 4) {
   console.error("Unable to determine reporting quarter / year from " + statusfilename)
@@ -132,7 +158,12 @@ progressObj = JSON.parse(progressData)
 //console.log(progressObj)
 
 // Mapping of book names to book number (according to Paratext) and chapter numbers
-let booksData = fs.readFileSync("./books.json");
+let booksFilename = "books.json"
+if (!fs.existsSync(booksFilename)) {
+  console.error("Can't open book info file " + booksFilename)
+  process.exit(1)
+}
+let booksData = fs.readFileSync(booksFilename);
 let booksObj = JSON.parse(booksData);
 
 // TODO: Project XML path as parameter
@@ -140,8 +171,6 @@ var data = fs.readFileSync("./ProjectProgress.xml",'utf-8');
 const xmlObj = xmlParser.toJson(data, {reversible: true, object: true})
 //console.log(xmlObj)
 
-// TODO: Define user as parameter
-let user = "Darcy Wong";
 updateDraftingProgress(progressObj, xmlObj, user);
 
 // Convert back to XML and beautify
