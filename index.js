@@ -1,3 +1,4 @@
+// Copyright 2020 SIL International
 'use strict';
 
 const fs = require("fs");
@@ -5,6 +6,11 @@ const path = require("path");
 const xmlParser = require("xml2json");
 const vkbeautify = require("vkbeautify");
 
+
+/**
+ * Function displayUsage
+ * Description: Displays help info
+ */
 function displayUsage() {
   console.info("node index.js [user name] [status file] [Paratext project path]")
   console.info("[user name] - Paratext user name that will be") 
@@ -20,12 +26,17 @@ function displayUsage() {
   process.exit(1)
 }
 
-// Given a 3-character book code and chapter number, create a #-# string
-// corresponding to [Paratext book code number]-[chapter number]
-// Note: Paratext seems to use 40 for Matthew in the "Assignments and Progress" tables 
-// (vs skipping book 40)
-// bookCode - 3 character book code
-// chapter  - Integer for the chapter
+
+/**
+ * Function getBookChapterNumber
+ * @param {string} bookCode 3-character book code
+ * @param {integer} chapter  Chapter number (0 used for "published" status)
+ * Description: Given a 3-character book code and chapter number, create a #-# string
+ * corresponding to [Paratext book code number]-[chapter number]
+ * If the book is not found, returns -1
+ * Note: Paratext seems to use book number 40 for Matthew in the "Assignments and Progress" tables 
+ * (vs skipping book 40)
+ */
 function getBookChapterNumber(bookCode, chapter) {
   if (bookCode in booksObj) {
     return booksObj[bookCode].BookNum + "-" + chapter;
@@ -36,9 +47,13 @@ function getBookChapterNumber(bookCode, chapter) {
   return "-1";
 }
 
-// Instead of getting current date with moment().format(), 
-// generate the reporting date which will be the 28th of the final month in the reporting quarter
-// Also assigning an arbitrary time
+
+/**
+ * Function getReportingDate
+ * Description: Instead of getting current date with moment().format(), 
+ * generate the reporting date which will be the 28th of the final month in the reporting quarter
+ * Also assigning an arbitrary time
+ */
 function getReportingDate() {
   // Mapping from Fiscal quarter to reporting month (2 digit string)
   const ReportingQuarterToMonth = new Map
@@ -57,12 +72,18 @@ function getReportingDate() {
   return reportingDate
 }
 
-// Update the drafting progress sections of xmlObj.
-// progressObj: object from the project reports which contains completed info
-// xmlObj: ProjectProgress.xml as an object to update
-// user: String of the user for each updated status element
-function updateDraftingProgress(progressObj, xmlObj, user) {
-  // Mapping from the "Progress and Planning" phases to the Paratext phases 
+
+/**
+ * Function updateProgress
+ * @param {object} progressObj  JSON object from the project reports which contains completed info
+ * @param {object} xmlObj       JSON object of ProgressProgress.xml which is modified
+ * @param {string} user         Paratext user for each updated status element
+ * Description  Update the assignment and status sections of xmlObj for each Paratext phase.
+ * xmlObj is modified during the process.
+ */
+function updateProgress(progressObj, xmlObj, user) {
+  // Mapping from the "Progress and Planning" phases to the Paratext phases
+  // typos match the spellings in Paratext
   const PPToParatextPhase = new Map
     ([['Exegesis & First Draft', 'Exegisis & First Draft'],
       ['Team Check', 'Team Checking'],
@@ -81,7 +102,7 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
 
   let reportingDate = getReportingDate();
 
-  // Fill out drafting progress
+  // Fill out progress for the project phase
   // Not using forEach to maintain context
   for (let bookCode in progressObj) {
     let bookObj = progressObj[bookCode];
@@ -95,11 +116,25 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
       }
       stageIndex = ParatextPhaseToStageIndex.get(paratextPhase);
       
-      // Update Assignments node
-      if (!Array.isArray(xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments)) {
-        xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments = [xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments];
+      // Investigate if the XPath xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task
+      // is valid across the Paratext projects
+
+      // Keep a reference to Task so xmlObj will be modified
+      let task = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task;
+      if (Array.isArray(task)) {
+        task = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task[0];
       }
-      let assignmentsArray = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments;
+      // Update Assignments node.
+      let assignmentsArray = task.Assignments
+      if (assignmentsArray === undefined) {
+        console.warn("Error updating assignments for " + bookCode + " in phase " + paratextPhase + ". Skipping...")
+        continue;
+      }
+      // Convert from JSON to JSONArray as needed so we can push new assignments
+      if (!Array.isArray(assignmentsArray)) {
+        task.Assignments = [task.Assignments]
+        assignmentsArray = task.Assignments;
+      }
       let existingIndex = assignmentsArray.findIndex(el => el.book === bookCode);
       if (existingIndex == -1) {
         // Add new assignment
@@ -108,11 +143,17 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
         assignmentsArray.push(updatedAssignment)
       }
 
-      // Update Status node
-      if (!Array.isArray(xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status)) {
-        xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status = [xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status];
+      // Update Status node.
+      let statusArray = task.Status
+      if (statusArray === undefined) {
+        console.warn("Error updating status for " + bookCode + " in phase " + paratextPhase + ". Skipping...")
+        continue;
       }
-      let statusArray = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status;
+      // Convert from JSON to JSONArray as needed so we can push new status
+      if (!Array.isArray(statusArray)) {
+        task.Status = [task.Status]
+        statusArray = task.Status;
+      }
 
       for (let ch=1; ch<=bookObj[ppPhase]; ch++) {
         let bookChapterNumber;
@@ -123,12 +164,11 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
         } else {
           bookChapterNumber = getBookChapterNumber(bookCode, ch);
         } 
-        let updatedStatus = {};
-        //let existingStatus = statusArray.find(el => el.bookChapter === bookChapterNumber);
-        let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
 
+        let updatedStatus = {};
+        let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
         if (existingIndex != -1) {
-          // Update existing status
+          // Update existing status to "Done"
           if (statusArray[existingIndex].done != "true") {
             statusArray[existingIndex].done = true;
             statusArray[existingIndex].user = user;
@@ -140,7 +180,6 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
           updatedStatus.done = "true";
           updatedStatus.user = user;
           updatedStatus.date = reportingDate
-          //console.log(updatedStatus);
 
           statusArray.push(updatedStatus);
         }
@@ -156,39 +195,22 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
 ////////////////////////////////////////////////////////////////////
 // Get parameters
 ////////////////////////////////////////////////////////////////////
-if ((process.argv.length == 3) && (process.argv[2]  == "-h" || process.argv[2] == "-?")) {
+if (((process.argv.length == 3) && (process.argv[2]  == "-h" || process.argv[2] == "-?")) ||
+    (process.argv.length < 5)) {
   displayUsage()
 }
 
-let user
-if (process.argv.length > 2) {
-  user = process.argv[2];
-} else {
-  // Default test user name
-  user = "Darcy Wong"
-}
-
-let statusFilename;
-if (process.argv.length > 3) {
-  statusFilename = process.argv[3];
-} else {
-  // Default test files
-  statusFilename = "MEP-Q2-2020.json"
-}
-
+let user = process.argv[2];
+let statusFilename = process.argv[3];
+let projectPath = process.argv[4];
 console.log("User: \"" + user + "\" processing status file: " + statusFilename);
+
+// Check files exist
 if (!fs.existsSync(statusFilename)) {
   console.error("Can't open status file " + statusFilename)
   process.exit(1)
 }
 
-let projectPath;
-if (process.argv.length > 4) {
-  projectPath = process.argv[4];
-} else {
-  // Default test file
-  projectPath = "/c/My Paratext 8 Projects/MEP/"
-}
 let projectProgressFilename = path.join(projectPath, "ProjectProgress.xml");
 if (!fs.existsSync(projectProgressFilename)) {
   console.error("Can't find Paratext file: " + projectProgressFilename);
@@ -211,7 +233,6 @@ let reportingYear = statusFilenameArr[2];
 let progressData, progressObj;
 progressData = fs.readFileSync(statusFilename);
 progressObj = JSON.parse(progressData)
-//console.log(progressObj)
 
 // Mapping of book names to book number (according to Paratext) and chapter numbers
 let booksFilename = "books.json"
@@ -228,9 +249,9 @@ fs.copyFileSync(projectProgressFilename, projectProgressFilename + ".bak");
 // Update ProjectProgress.xml
 let projectProgressData = fs.readFileSync(projectProgressFilename,'utf-8');
 const xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
-//console.log(xmlObj)
 
-updateDraftingProgress(progressObj, xmlObj, user);
+// Update the project progress for xmlObj
+updateProgress(progressObj, xmlObj, user);
 
 // Convert back to XML and beautify
 let options = {
@@ -243,4 +264,4 @@ updatedData = vkbeautify.xml(updatedData, 2);
 // xmlParser loses the XML tags so append when writing back to file
 let header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 fs.writeFileSync(projectProgressFilename, header + updatedData);
-console.log();
+console.info("Project updates written to " + projectProgressFilename);
