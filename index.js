@@ -1,3 +1,4 @@
+// Copyright 2020 SIL International
 'use strict';
 
 const fs = require("fs");
@@ -95,11 +96,22 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
       }
       stageIndex = ParatextPhaseToStageIndex.get(paratextPhase);
       
-      // Update Assignments node
-      if (!Array.isArray(xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments)) {
-        xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments = [xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments];
+      // Keep a reference to Task so xmlObj will be modified
+      let task = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task;
+      if (Array.isArray(task)) {
+        task = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task[0];
       }
-      let assignmentsArray = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Assignments;
+      // Update Assignments node.
+      let assignmentsArray = task.Assignments
+      if (assignmentsArray === undefined) {
+        console.warn("Error updating assignments for " + bookCode + " in phase " + paratextPhase + ". Skipping...")
+        continue;
+      }
+      // Convert from JSON to JSONArray as needed so we can push new assignments
+      if (!Array.isArray(assignmentsArray)) {
+        task.Assignments = [task.Assignments]
+        assignmentsArray = task.Assignments;
+      }
       let existingIndex = assignmentsArray.findIndex(el => el.book === bookCode);
       if (existingIndex == -1) {
         // Add new assignment
@@ -108,11 +120,17 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
         assignmentsArray.push(updatedAssignment)
       }
 
-      // Update Status node
-      if (!Array.isArray(xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status)) {
-        xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status = [xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status];
+      // Update Status node.
+      let statusArray = task.Status
+      if (statusArray === undefined) {
+        console.warn("Error updating status for " + bookCode + " in phase " + paratextPhase + ". Skipping...")
+        continue;
       }
-      let statusArray = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task.Status;
+      // Convert from JSON to JSONArray as needed so we can push new status
+      if (!Array.isArray(statusArray)) {
+        task.Status = [task.Status]
+        statusArray = task.Status;
+      }
 
       for (let ch=1; ch<=bookObj[ppPhase]; ch++) {
         let bookChapterNumber;
@@ -123,12 +141,11 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
         } else {
           bookChapterNumber = getBookChapterNumber(bookCode, ch);
         } 
-        let updatedStatus = {};
-        //let existingStatus = statusArray.find(el => el.bookChapter === bookChapterNumber);
-        let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
 
+        let updatedStatus = {};
+        let existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
         if (existingIndex != -1) {
-          // Update existing status
+          // Update existing status to "Done"
           if (statusArray[existingIndex].done != "true") {
             statusArray[existingIndex].done = true;
             statusArray[existingIndex].user = user;
@@ -156,39 +173,22 @@ function updateDraftingProgress(progressObj, xmlObj, user) {
 ////////////////////////////////////////////////////////////////////
 // Get parameters
 ////////////////////////////////////////////////////////////////////
-if ((process.argv.length == 3) && (process.argv[2]  == "-h" || process.argv[2] == "-?")) {
+if (((process.argv.length == 3) && (process.argv[2]  == "-h" || process.argv[2] == "-?")) ||
+    (process.argv.length < 5)) {
   displayUsage()
 }
 
-let user
-if (process.argv.length > 2) {
-  user = process.argv[2];
-} else {
-  // Default test user name
-  user = "Darcy Wong"
-}
-
-let statusFilename;
-if (process.argv.length > 3) {
-  statusFilename = process.argv[3];
-} else {
-  // Default test files
-  statusFilename = "MEP-Q2-2020.json"
-}
-
+let user = process.argv[2];
+let statusFilename = process.argv[3];
+let projectPath = process.argv[4];
 console.log("User: \"" + user + "\" processing status file: " + statusFilename);
+
+// Check files exist
 if (!fs.existsSync(statusFilename)) {
   console.error("Can't open status file " + statusFilename)
   process.exit(1)
 }
 
-let projectPath;
-if (process.argv.length > 4) {
-  projectPath = process.argv[4];
-} else {
-  // Default test file
-  projectPath = "/c/My Paratext 8 Projects/MEP/"
-}
 let projectProgressFilename = path.join(projectPath, "ProjectProgress.xml");
 if (!fs.existsSync(projectProgressFilename)) {
   console.error("Can't find Paratext file: " + projectProgressFilename);
@@ -243,4 +243,4 @@ updatedData = vkbeautify.xml(updatedData, 2);
 // xmlParser loses the XML tags so append when writing back to file
 let header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 fs.writeFileSync(projectProgressFilename, header + updatedData);
-console.log();
+console.info("Project updates written to " + projectProgressFilename);
