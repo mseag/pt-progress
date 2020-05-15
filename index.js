@@ -1,11 +1,11 @@
 // Copyright 2020 SIL International
 'use strict';
 
-const fs = require("fs");
-const path = require("path");
-const xmlParser = require("xml2json");
-const vkbeautify = require("vkbeautify");
-
+import fs from 'fs';
+import path from 'path';
+import Reporting from './reporting.js';
+import xmlParser from 'xml2json';
+import vkbeautify from 'vkbeautify';
 
 /**
  * Function displayUsage
@@ -49,31 +49,6 @@ function getBookChapterNumber(bookCode, chapter) {
 
 
 /**
- * Function getReportingDate
- * Description: Instead of getting current date with moment().format(), 
- * generate the reporting date which will be the 28th of the final month in the reporting quarter
- * Also assigning an arbitrary time
- */
-function getReportingDate() {
-  // Mapping from Fiscal quarter to reporting month (2 digit string)
-  const ReportingQuarterToMonth = new Map
-    ([['Q1', '12'],
-      ['Q2', '03'],
-      ['Q3', '06'],
-      ['Q4', '09']])
-
-  const reportingTime = "09:19:56.0972475+07:00"
-
-  if (!ReportingQuarterToMonth.has(reporting.quarter)) {
-    console.error("Unable to generate reporting date for invalid reporting quarter: " + reporting.quarter)
-    process.exit(1)
-  }
-  let reportingDate = reporting.year + "-" + ReportingQuarterToMonth.get(reporting.quarter) + "-28T" + reportingTime
-  return reportingDate
-}
-
-
-/**
  * Function updateProgress
  * @param {object} progressObj  JSON object from the project reports which contains completed info
  * @param {object} xmlObj       JSON object of ProgressProgress.xml which is modified
@@ -100,7 +75,7 @@ function updateProgress(progressObj, xmlObj, user) {
   ['Consultant Check', 4],
   ['Published', 5]]);
 
-  let reportingDate = getReportingDate();
+  let reportingDate = reportingInfo.getReportingDate();
 
   // Fill out progress for the project phase
   // Not using forEach to maintain context
@@ -227,10 +202,7 @@ if (statusFilenameArr.length < 4) {
   console.error("Unable to determine reporting [project name, quarter, year] from " + statusFilename)
   process.exit(1)
 }
-let reporting = {};
-reporting.projectName = statusFilenameArr[0];
-reporting.quarter = statusFilenameArr[1];
-reporting.year = statusFilenameArr[2];
+let reportingInfo = new Reporting(statusFilenameArr[0], statusFilenameArr[1], statusFilenameArr[2]);
 
 let progressData, progressObj;
 progressData = fs.readFileSync(statusFilename);
@@ -266,4 +238,4 @@ updatedData = vkbeautify.xml(updatedData, 2);
 // xmlParser loses the XML tags so append when writing back to file
 let header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 fs.writeFileSync(projectProgressFilename, header + updatedData);
-console.info("Project " + reporting.projectName + " updates written to " + projectProgressFilename);
+console.info("Project " + reportingInfo.projectName + " updates written to " + projectProgressFilename);

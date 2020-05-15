@@ -17,8 +17,8 @@ These utilities require configuring Excel and installing Node.js.
     3. In "Available References:", check "Microsoft Scripting Runtime" and hit "OK"
 
 ### Install Node.js
-Download and install the latest LTS for Node.js
-https://nodejs.org/en/download/
+Download and install the latest current version for Node.js ( > 13.0)
+https://nodejs.org/en/download/current/
 
 After installing Node.js, open a command prompt to this directory and run the following:
 ```bash
