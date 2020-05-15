@@ -64,11 +64,11 @@ function getReportingDate() {
 
   const reportingTime = "09:19:56.0972475+07:00"
 
-  if (!ReportingQuarterToMonth.has(reportingQuarter)) {
-    console.error("Unable to generate reporting date for invalid reporting quarter: " + reportingQuarter)
+  if (!ReportingQuarterToMonth.has(reporting.quarter)) {
+    console.error("Unable to generate reporting date for invalid reporting quarter: " + reporting.quarter)
     process.exit(1)
   }
-  let reportingDate = reportingYear + "-" + ReportingQuarterToMonth.get(reportingQuarter) + "-28T" + reportingTime
+  let reportingDate = reporting.year + "-" + ReportingQuarterToMonth.get(reporting.quarter) + "-28T" + reportingTime
   return reportingDate
 }
 
@@ -222,20 +222,22 @@ if (!fs.existsSync(projectProgressFilename)) {
 ////////////////////////////////////////////////////////////////////
 
 // Determine the reporting quarter and year from the status filename
-let statusFilenameArr = statusFilename.split(/[-.]+/)
+let statusFilenameArr = path.basename(statusFilename).split(/[-.]+/)
 if (statusFilenameArr.length < 4) {
-  console.error("Unable to determine reporting quarter / year from " + statusfilename)
+  console.error("Unable to determine reporting [project name, quarter, year] from " + statusFilename)
   process.exit(1)
 }
-let reportingQuarter = statusFilenameArr[1];
-let reportingYear = statusFilenameArr[2];
+let reporting = {};
+reporting.projectName = statusFilenameArr[0];
+reporting.quarter = statusFilenameArr[1];
+reporting.year = statusFilenameArr[2];
 
 let progressData, progressObj;
 progressData = fs.readFileSync(statusFilename);
 progressObj = JSON.parse(progressData)
 
 // Mapping of book names to book number (according to Paratext) and chapter numbers
-let booksFilename = "books.json"
+const booksFilename = "books.json"
 if (!fs.existsSync(booksFilename)) {
   console.error("Can't open book info file " + booksFilename)
   process.exit(1)
@@ -248,7 +250,7 @@ fs.copyFileSync(projectProgressFilename, projectProgressFilename + ".bak");
 
 // Update ProjectProgress.xml
 let projectProgressData = fs.readFileSync(projectProgressFilename,'utf-8');
-const xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
+let xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
 
 // Update the project progress for xmlObj
 updateProgress(progressObj, xmlObj, user);
@@ -264,4 +266,4 @@ updatedData = vkbeautify.xml(updatedData, 2);
 // xmlParser loses the XML tags so append when writing back to file
 let header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 fs.writeFileSync(projectProgressFilename, header + updatedData);
-console.info("Project updates written to " + projectProgressFilename);
+console.info("Project " + reporting.projectName + " updates written to " + projectProgressFilename);

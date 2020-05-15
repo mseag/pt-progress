@@ -32,10 +32,10 @@ npm install
 ## Usage
 
 ### Extracting the progress from Excel
-1. Run the macros in the "Progress and Planning" spreadsheet
+1. In the "Progress and Planning" spreadsheet, hit <kbd>Alt</kbd>+<kbd>F8</kbd> and run the `statusToJSON` macro
 2. This will create the following files:
-    1. books.json - JSON file containing book names, total number of chapters, and total number of verses
-    2. [Project]-[Reporting Quarter]-[Reporting Year].json - JSON file for the quarter [Q1, Q2, Q3, Q4] and year containing project phases and completed chapters per book
+    1. `books.json` - JSON file containing book names, total number of chapters, and total number of verses. The book names are from the "Verses per Chapter" sheet.
+    2. [Project]-[Reporting Quarter]-[Reporting Year].json - JSON file for the quarter [Q1, Q2, Q3, Q4] and 4-digit year containing project phases and completed chapters per book
 
 ### Use project status to update Paratext
 Once the two files above have been generated, go to the command prompt:
