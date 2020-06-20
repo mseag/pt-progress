@@ -2,7 +2,7 @@
 Utilities to transfer the "Progress" sheet in "**Planning & Progress**" Excel spreadsheet to "**Assignments & Progress**" in Paratext.
 
 
-## Setup
+## Developer Setup
 These utilities require configuring Excel and installing Node.js.
 
 ### Configuring Excel
@@ -16,16 +16,25 @@ These utilities require configuring Excel and installing Node.js.
     2. From MS Visual Basic for Applications --> Tools --> References...
     3. In "Available References:", check "Microsoft Scripting Runtime" and hit "OK"
 
-### Install Node.js
+### Install Node.js and TypeScript
 Download and install the latest current version for Node.js ( > 13.0)
 https://nodejs.org/en/download/current/
+
+Install TypeScript globally via npm:
+```
+npm install -g typescript
+```
 
 After installing Node.js, open a command prompt to this directory and run the following:
 ```bash
 npm install
 ```
 
-
+To rebuild the project
+```bash
+tsc
+```
+This compiles the TypeScript source files in `src/` into Javascript (`dist/`)
 
 ------------------
 
@@ -40,10 +49,10 @@ npm install
 ### Use project status to update Paratext
 Once the two files above have been generated, go to the command prompt:
 ```bash
-node index.js [Paratext user name] [progress file] [Paratext project path]
+node dist/index.js [Paratext user name] [progress file] [Paratext project path]
 ````
 
 For additional help:
 ```
-node index.js -h
+node dist/index.js -h
 ```
