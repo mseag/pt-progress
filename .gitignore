@@ -3,6 +3,8 @@
 
 # Output JSON files
 *.json
+# Output files
+dist/
 
 node_modules/
 
