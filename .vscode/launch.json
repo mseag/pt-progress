@@ -17,9 +17,9 @@
         "${workspaceFolder}/dist/**.js"
       ],
       "args": [
-        "Darcy Wong", 
-        ".\\RAD\\MEP-Q2-2020.json", 
-        "C:\\My Paratext 8 Projects\\MEP"
+        "-u", "Darcy Wong", 
+        "-s", ".\\RAD\\MEP-Q2-2020.json", 
+        "-p", "C:\\My Paratext 8 Projects\\MEP"
       ]
     }
   ]

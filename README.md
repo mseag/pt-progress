@@ -49,7 +49,7 @@ This compiles the TypeScript source files in `src/` into Javascript (`dist/`)
 ### Use project status to update Paratext
 Once the two files above have been generated, go to the command prompt:
 ```bash
-node dist/index.js [Paratext user name] [progress file] [Paratext project path]
+node dist/index.js -u [Paratext user name] -s [progress file] -p [Paratext project path]
 ````
 
 For additional help:
