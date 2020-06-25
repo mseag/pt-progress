@@ -3,18 +3,7 @@ Utilities to transfer the "Progress" sheet in "**Planning & Progress**" Excel sp
 
 
 ## Developer Setup
-These utilities require configuring Excel and installing Node.js.
-
-### Configuring Excel
-1. Enable macros in "Planning &  Progress"
-    1. From Excel --> File --> Options --> Customize Ribbon -> 
-    2. In "Main Tabs", check "Developer" and hit "OK"
-
-2. Add "Dictionary" for MS Visual Basic for Applications
-    1. From Excel --> Developer --> click "Visual Basic" button to 
-       access "MS Visual Basic for Applications"
-    2. From MS Visual Basic for Applications --> Tools --> References...
-    3. In "Available References:", check "Microsoft Scripting Runtime" and hit "OK"
+These utilities require Node.js and TypeScript.
 
 ### Install Node.js and TypeScript
 Download and install the latest current version for Node.js ( > 13.0)
@@ -36,20 +25,31 @@ tsc
 ```
 This compiles the TypeScript source files in `src/` into Javascript (`dist/`)
 
+You can also have TypeScript watch the project and recompile automatically
+```bash
+tsc -w
+```
+
 ------------------
 
 ## Usage
 
-### Extracting the progress from Excel
-1. In the "Progress and Planning" spreadsheet, hit <kbd>Alt</kbd>+<kbd>F8</kbd> and run the `statusToJSON` macro
-2. This will create the following files:
-    1. `books.json` - JSON file containing book names, total number of chapters, and total number of verses. The book names are from the "Verses per Chapter" sheet.
-    2. [Project]-[Reporting Quarter]-[Reporting Year].json - JSON file for the quarter [Q1, Q2, Q3, Q4] and 4-digit year containing project phases and completed chapters per book
+### Extracting the Excel project status
+You will need the path to your project's Excel `.xlsm` file (relative to this project)
 
-### Use project status to update Paratext
-Once the two files above have been generated, go to the command prompt:
 ```bash
-node dist/index.js -u [Paratext user name] -s [progress file] -p [Paratext project path]
+node dist/index.js -x [path to Excel file]
+```
+
+This will extract the project's "Progress" worksheet and save it to a file named
+*[Project name]*-*[Reporting Quarter]*-*[Reporting Year]*.json where the quarter is [Q1, Q2, Q3, Q4].
+
+### Extract the Excel project status and update Paratext
+In addition to the Excel project's path, you will need a Parartext user name (that gets written to the status) and 
+the full path to your corresponding Paratext project.
+
+```bash
+node dist/index.js -x [path to Excel file] -u [Paratext user name] -p [Paratext project path]
 ````
 
 For additional help:

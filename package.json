@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -p .",
+    "lint": "eslint . --ext .ts",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,6 +26,7 @@
   "homepage": "https://github.com/mseag/pt-progress#readme",
   "dependencies": {
     "commander": "^5.1.0",
+    "convert-excel-to-json": "^1.7.0",
     "path": "^0.12.7",
     "vkbeautify": "^0.99.3",
     "xml-formatter": "^1.2.1",
@@ -32,6 +34,9 @@
   },
   "devDependencies": {
     "@types/node": "^14.0.13",
+    "@typescript-eslint/eslint-plugin": "^3.4.0",
+    "@typescript-eslint/parser": "^3.4.0",
+    "eslint": "^7.3.1",
     "nodemon": "^2.0.4",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
