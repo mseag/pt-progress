@@ -1,37 +1,39 @@
-// Basic phases that match the output of the P&P spreadsheet macro
-export const enum PhaseType {
-  exegesisAndFirstDraft = "exegesisAndFirstDraft",
-  teamChecking = "teamChecking",
-  advisorCheckAndBackTranslation = "advisorCheckAndBackTranslation",
-  communityTesting = "communityTesting",
-  consultantChecking = "consultantChecking",
-  publish = "publish"
-} 
+// Copyright 2020 SIL International
+// Types and utilities for project phases
+
+export type PhaseType =
+  // exegesis and first draft
+  "exegesis" |
+  // team checking
+  "team" |
+  // advisor check and back translation
+  "advisor" |
+  // community testing
+  "community" |
+  // consultant checking
+  "consultant" |
+  // publish
+  "publish";
 
 export class Phase {
-
-  public ParatextPhaseToStageIndex = new Map([
-    ['Exegisis & First Draft', 0],
-    ['Team Checking', 1],
-    ['Advisor check and back transaltion', 2],
-    ['Community Testing', 3],
-    ['Consultant Check', 4],
-    ['Published', 5]
-  ]);
-
-  // Map to Paratext phases
-  private phaseToParatext = new Map([
-    [PhaseType.exegesisAndFirstDraft, 'Exegisis & First Draft'],
-    [PhaseType.teamChecking, 'Team Checking'],
-    [PhaseType.advisorCheckAndBackTranslation, 'Advisor check and back transaltion'],
-    [PhaseType.communityTesting, 'Community Testing'],
-    [PhaseType.consultantChecking, 'Consultant Check'],
-    [PhaseType.publish, 'Published']
-  ]);
-
+  /**
+   * Convert phase to Paratext stage index. Stage index is used to access the
+   * <Stages> node in "ProjectProgress.xml"
+   * @param {PhaseType} ppPhase
+   * @returns number Corresponding Paratext stage index
+   */
   // Function to convert PP phase to Paratext phase
-  public phaseToParatextPhase(ppPhase : string) : string {
-    let phase: PhaseType = ppPhase as PhaseType;
-    return this.phaseToParatext.get(phase) as string;
-  }  
+  public phaseToStageIndex(ppPhase : PhaseType) : number {
+    switch(ppPhase) {
+      case 'exegesis': return 0;
+      case 'team': return 1;
+      case 'advisor': return 2;
+      case 'community': return 3;
+      case 'consultant': return 4;
+      case 'publish': return 5;
+      default:
+        console.error('Invalid phase: ' + ppPhase);
+        return -1;
+    }
+  }
 }

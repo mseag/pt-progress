@@ -10,16 +10,16 @@
       "name": "Debug Program",
       "sourceMaps": true,
       "program": "${workspaceFolder}/dist/index.js",
-      //"program": "${workspaceFolder}/src/index.ts",
-      //"preLaunchTask": "tsc: build - tsconfig.json",
-      //"preLaunchTask": "npm: debug",
       "outFiles": [
         "${workspaceFolder}/dist/**.js"
       ],
       "args": [
-        "-u", "Darcy Wong", 
-        "-s", ".\\RAD\\MEP-Q2-2020.json", 
-        "-p", "C:\\My Paratext 8 Projects\\MEP"
+        //"-x", "./test/MEP q4 2019 19419.xlsm",
+        //"-x", "./test/Shatikha 2 P&P Oct 22.xlsm",
+        "-x", "./test/Planning & Progress form 19Aug16 (3).xlsm",
+        "-u", "Darcy Wong",
+        //"-q", "Q3", 
+        "-p", "C:\\My Paratext 9 Projects\\MEP"
       ]
     }
   ]

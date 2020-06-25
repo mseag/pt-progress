@@ -1,10 +1,12 @@
-# MS Word progress reports
-*.docx
 
-# Output JSON files
-*.json
-# Output files
+# Output project status files
+*-*-*.json
+
+# Compiled Output files
 dist/
+
+# Test files
+test/
 
 node_modules/
 
