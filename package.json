@@ -1,19 +1,22 @@
 {
   "name": "pt-progress",
   "version": "0.1.0",
-  "description": "Utility to convert project progress from JSON file to XML",
-  "main": "index.js",
+  "description": "Utility to convert project progress from Excel file to Paratext",
+  "main": "dist/index",
   "scripts": {
     "build": "tsc -p .",
     "lint": "eslint . --ext .ts",
+    "publish": "pkg dist/index.js --output pt-progress.exe",
     "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "tsc -w & nodemon -q -w dist"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mseag/pt-progress.git"
   },
   "keywords": [
+    "excel",
     "paratext",
     "json",
     "xml"

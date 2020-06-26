@@ -1,7 +1,12 @@
 // Copyright 2020 SIL International
 // Type for Excel project status that gets saved to JSON.
 // The status can be used to update a Paratext project.
+import {PhaseType} from "./phase";
 import * as reporting from "./reporting";
+
+export type StatusMap = {
+  [phase in PhaseType ]?: Status
+};
 
 export class Status {
   chapters: number;               // Completed chapters

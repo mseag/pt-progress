@@ -61,7 +61,8 @@ const ep = new excelProject.ExcelProject();
 const reportingInfo = ep.getReportingInfo(program.xlsm);
 
 // Get the status from the Excel file
-const progressObj = ep.exportStatus(program.xlsm, reportingInfo);
+const progressObj: excelProject.ExcelProjectStatusType =
+  ep.exportStatus(program.xlsm, reportingInfo);
 
 // If Paratext user name and project path given, update Paratext progress
 if (program.user && program.project) {

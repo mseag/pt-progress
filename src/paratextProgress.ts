@@ -1,8 +1,10 @@
 // Copyright 2020 SIL International
 // Types and utilities for updating Paratext progress
 import * as books from "./books";
+import { ExcelProjectStatusType} from "./excelProject";
 import * as phase from "./phase";
 import * as reporting from "./reporting";
+import { StatusMap, Status } from "./status";
 
 /**
  * Information to write for updating Paratext status.
@@ -43,32 +45,36 @@ export class ParatextProgress {
   /**
    * Update the assignment and status sections of xmlObj for each Paratext phase.
    * xmlObj is modified during the process.
-   * @param {object} progressObj   JSON object from the project reports which contains completed info
+   * @param {ExcelProjectStatusType} progressObj   JSON object from the project reports which contains completed info
    * @param {object} xmlObj        JSON object of ProgressProgress.xml which is modified
    * @param {string} user          Paratext user for each updated status element
    * @param {QuarterType|undefined} quarter If specified, only update Paratext status for the matching quarter/year
    * @param {Reporting} reportingInfo Information for the project
    */
-  public update(progressObj: any, xmlObj: any , user: string,
+  public update(progressObj: ExcelProjectStatusType, xmlObj: any , user: string,
       reportingInfo: reporting.Reporting, quarter: reporting.QuarterType|undefined): void {
     // Fill out progress for the project phase
     // Not using forEach to maintain context
     const p = new phase.Phase();
-    for (const bookCode in progressObj) {
-      for(const bookObj of progressObj[bookCode]) {
-        for (const ppPhase in bookObj) {
-          const phaseObj = bookObj[ppPhase];
+    for (const bookKey in progressObj) {
+      const bookCode: books.CodeType = bookKey as books.CodeType;
+      const statusArray = progressObj[bookCode] as StatusMap[];
+      for(const bookObj of statusArray) {
+        for (const phaseKey in bookObj) {
+          const ppPhase: phase.PhaseType = phaseKey as phase.PhaseType;
+          const phaseObj: Status = bookObj[ppPhase] as Status;
 
-          // If quarter defined, only handle current reporting quarter
+          // If quarter defined, only handle current reporting quarter & year
           if ((quarter === undefined) || (quarter &&
               phaseObj.quarter === reportingInfo.quarter &&
-              phaseObj.year === reportingInfo.year)) {
+              phaseObj.year.toString() === reportingInfo.year)) {
+
             const phaseReportingInfo: reporting.Reporting = new reporting.Reporting(
               reportingInfo.projectName,
               phaseObj.quarter,
-              phaseObj.year);
+              phaseObj.year.toString());
             const reportingDate = reporting.getReportingDate(phaseReportingInfo);
-            const stageIndex: number = p.phaseToStageIndex(ppPhase as phase.PhaseType);
+            const stageIndex: number = p.phaseToStageIndex(ppPhase);
 
             // Investigate if the XPath xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task
             // is valid across the Paratext projects
@@ -110,14 +116,14 @@ export class ParatextProgress {
             }
 
             const startingCh: number = phaseObj.startingChapter;
-            for (let ch = startingCh; ch < startingCh+bookObj[ppPhase].chapters; ch++) {
+            for (let ch = startingCh; ch < startingCh+phaseObj.chapters; ch++) {
               let bookChapterNumber: string;
               if (ppPhase === "publish") {
                 // Publishing only deals with Chapter "0":
                 // Could optimize this to not happen for each chapter
-                bookChapterNumber = this.getBookChapterNumber(bookCode as books.CodeType, 0);
+                bookChapterNumber = this.getBookChapterNumber(bookCode, 0);
               } else {
-                bookChapterNumber = this.getBookChapterNumber(bookCode as books.CodeType, ch);
+                bookChapterNumber = this.getBookChapterNumber(bookCode, ch);
               }
 
               let updatedStatus: projectStatusType;
@@ -145,14 +151,5 @@ export class ParatextProgress {
         }
       }
     }
-  }
-
-  private inReportingQuarter(reportingQuarter: reporting.QuarterType,
-      phaseQuarter: reporting.QuarterType): boolean {
-   if ((phaseQuarter === '25%') || (phaseQuarter === '50%') || (phaseQuarter === '75%')) {
-     return true;
-   }
-
-   return reportingQuarter === phaseQuarter;
   }
 }
