@@ -3,7 +3,7 @@
 import * as fs from "fs";
 import * as books from "./books";
 import * as reporting from "./reporting";
-import * as status from "./status";
+import {StatusMap, Status} from "./status";
 const excelToJson = require('convert-excel-to-json');
 
 /**
@@ -11,15 +11,7 @@ const excelToJson = require('convert-excel-to-json');
  */
 const PROGRESS_SHEET = 'Progress';
 
-/**
- * Extra text to remove from the project title
- */
-const PROJECT_TITLE_EXTRA =  'Progress Table';
-
-/**
- * Book "name" which marks the end of rows to process
- */
-const END_OF_BOOK_NAMES = 'Other Goals and Milestones';
+export type ExcelProjectStatusType = { [code in books.CodeType]? : StatusMap[] };
 
 /**
  * This contains methods for extracting status information
@@ -41,6 +33,11 @@ export class ExcelProject {
       }]
     });
 
+    /**
+     * Extra text to remove from the project title
+     */
+    const PROJECT_TITLE_EXTRA =  'Progress Table';
+
     let projectTitle: string = result.Progress[0].P;
     projectTitle = projectTitle.replace(PROJECT_TITLE_EXTRA, '').trim();
     if (!projectTitle) {
@@ -60,9 +57,10 @@ export class ExcelProject {
    *   "[project name]-[reporting quarter]-[year].json"
    * @param {string} excelFile Path to Excel file
    * @param reportingInfo Project reporting information
-   * @returns {Object} status object
+   * @returns {ExcelProjectStatusType} Project status object
    */
-  public exportStatus(excelFile: string, reportingInfo: reporting.Reporting) : any {
+  public exportStatus(excelFile: string, reportingInfo: reporting.Reporting) :
+      ExcelProjectStatusType {
     const result = excelToJson({
       sourceFile: excelFile,
       sheets: [{
@@ -74,25 +72,35 @@ export class ExcelProject {
         columnToKey: {
           P: 'bookName',
           Q: 'verses',
+
           R: 'exegesisQuarter',
           S: 'exegesisYear',
+
           T: 'teamQuarter',
           U: 'teamYear',
+
           V: 'advisorQuarter',
           W: 'advisorYear',
+
           X: 'communityQuarter',
           Y: 'communityYear',
+
           Z: 'consultantQuarter',
           AA: 'consultantYear',
+
           AB: 'publishQuarter',
           AC: 'publishYear'
         }
       }]
     })
 
+    /**
+     * Book "name" which marks the end of rows to process
+     */
+    const END_OF_BOOK_NAMES = 'Other Goals and Milestones';
 
     const b = new books.Books();
-    const resultObj: any = {};
+    const resultObj: ExcelProjectStatusType = {};
     // Iterate through the progress table and process entries that that contain status
     for(let i = 0; i<result.Progress.length; i++) {
       const bookName = result.Progress[i].bookName;
@@ -124,12 +132,12 @@ export class ExcelProject {
       // Process each book for phase statuses.
       // Because a project plan may split a book into several units of work,
       // the status for each entry gets appended into an array.
-      const bookStatus = this.parseBookStatus(reportingInfo, result.Progress[i])
+      const bookStatus: StatusMap = this.parseBookStatus(reportingInfo, result.Progress[i])
       if (bookStatus && Object.keys(bookStatus).length > 0) {
-        let statusArray: Object[] = [];
+        let statusArray: StatusMap[] = [];
         if (bookInfo.code in resultObj) {
           // Get existing status
-          statusArray = resultObj[bookInfo.code];
+          statusArray = resultObj[bookInfo.code] as StatusMap[];
         } else {
           resultObj[bookInfo.code] = statusArray;
         }
@@ -167,7 +175,7 @@ export class ExcelProject {
    */
   private completedChaptersInQuarter(
       reportingInfo: reporting.Reporting, bookInfo: books.bookType, startingChapter: number,
-      phaseQuarter: reporting.QuarterType | number, phaseYear: number, verses: number|undefined): status.Status {
+      phaseQuarter: reporting.QuarterType | number, phaseYear: number, verses: number|undefined): Status {
     let quarter: reporting.QuarterType;
     let chapters: number;
     const chaptersForUnit: number = (verses) ?
@@ -175,6 +183,7 @@ export class ExcelProject {
       bookInfo.chapters;
 
     switch(phaseQuarter) {
+      // For percentages, use the reporting info quarter
       case '25%':
       case 0.25 :
         quarter = reportingInfo.quarter;
@@ -191,11 +200,12 @@ export class ExcelProject {
         chapters = Math.round(chaptersForUnit * 3 / 4);
         break;
       default:
+        // Use the phase quarter
         quarter = phaseQuarter as reporting.QuarterType;
         chapters = chaptersForUnit;
     }
 
-    const bookStatus = new status.Status(chapters, startingChapter, quarter, phaseYear);
+    const bookStatus = new Status(chapters, startingChapter, quarter, phaseYear);
     return bookStatus;
   }
 
@@ -219,16 +229,15 @@ export class ExcelProject {
    * status information (quarter, year), a status object {status.Status} is created.
    * @param {reporting.Reporting} reportingInfo Project information
    * @param {Object} bookEntry Cells from the row denoting status for each phase
-   * @returns {Object} status consisting of phase, quarter, year, and completed chapters
+   * @returns {StatusMap} status consisting of phase, quarter, year, and completed chapters
    */
-  private parseBookStatus(reportingInfo: reporting.Reporting, bookEntry: any) : Object {
+  private parseBookStatus(reportingInfo: reporting.Reporting, bookEntry: any) : StatusMap {
     const bookName = bookEntry.bookName;
     const b = new books.Books;
     const bookInfo = b.getBookByName(bookName);
 
-    const status : any = {};
+    const status : StatusMap = {};
     const startingChapter: number = bookEntry.startingChapter;
-
     // Can't for loop since columns have unique names
     if (bookEntry.exegesisQuarter && bookEntry.exegesisYear) {
       status.exegesis = this.completedChaptersInQuarter(
