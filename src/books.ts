@@ -550,7 +550,7 @@ export class Books {
     }
     const book : bookType = bookInfo.find(b => b.name === bookName) as bookType;
     if (book === undefined) {
-      console.error(`getBookByName() failed for name: ${name}`);
+      console.error(`Spreadsheet may have a typo for book name: ${name}. Exiting`);
       process.exit(1);
     }
     return book;

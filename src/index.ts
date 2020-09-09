@@ -6,8 +6,8 @@ import * as path from "path";
 import * as excelProject from "./excelProject";
 import * as paratextProgress from "./paratextProgress";
 import { isQuarter } from "./reporting";
-const xmlParser = require('xml2json');
-const vkbeautify = require('vkbeautify');
+import * as xmlParser from 'xml2json';
+import * as vkbeautify from 'vkbeautify';
 const {version} = require('../package.json');
 ////////////////////////////////////////////////////////////////////
 // Get parameters
