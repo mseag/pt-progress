@@ -1,12 +1,14 @@
-
-# Output project status files
-*-*-*.json
-
-# Compiled Output files
-dist/
+# Dependencies
+node_modules/
 
 # Test files
 test/
 
-node_modules/
+# Compiled Output files
+dist/
 
+# Output project status files
+*-*-*.json
+
+# Publish artifact
+pt-progress.exe

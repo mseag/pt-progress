@@ -211,7 +211,7 @@ export class ExcelProject {
 
   /**
    * Given a number of verses and chapters, apply the proportion to calculate a number of chapters
-   * @param {number} verses          Nuumber of completed verses for the unit
+   * @param {number} verses          Number of completed verses for the unit
    * @param {number} totalVerses     Total number of verses for a book
    * @param {number} chaptersInBook  Total number of chapters for a book
    * @returns {number} The calculated proportion of completed chapters (rounded)
