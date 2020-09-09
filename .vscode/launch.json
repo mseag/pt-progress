@@ -16,10 +16,13 @@
       "args": [
         //"-x", "./test/MEP q4 2019 19419.xlsm",
         //"-x", "./test/Shatikha 2 P&P Oct 22.xlsm",
-        "-x", "./test/Planning & Progress form 19Aug16 (3).xlsm",
-        "-u", "Darcy Wong",
+        //"-x", "./test/Planning & Progress form 19Aug16 (3).xlsm",
+        "-x", "./test/test Palaung q4 2020.xlsm",
+        //"-u", "Darcy Wong",
+        "-u", "Scott Dysart",
         //"-q", "Q3", 
-        "-p", "C:\\My Paratext 9 Projects\\MEP"
+        //"-p", "C:\\My Paratext 9 Projects\\MEP"
+        "-p", "C:\\My Paratext 8 Projects\\PTP_test"
       ]
     }
   ]

@@ -84,12 +84,13 @@ export class ParatextProgress {
             if (Array.isArray(task)) {
               task = xmlObj.ProgressInfo.Stages.Stage[stageIndex].Task[0];
             }
+
             // Update Assignments node.
-            let assignmentsArray = task.Assignments
-            if (assignmentsArray === undefined) {
-              console.warn("Error updating assignments for " + bookCode + " in phase " + ppPhase + ". Skipping...")
-              continue;
+            if (task.Assignments === undefined) {
+              console.warn("Warning: Assignments undefined for " + bookCode + " in phase " + ppPhase + ". Initializing...")
+              task.Assignments = [];
             }
+            let assignmentsArray = task.Assignments
             // Convert from JSON to JSONArray as needed so we can push new assignments
             if (!Array.isArray(assignmentsArray)) {
               task.Assignments = [task.Assignments]
@@ -104,11 +105,11 @@ export class ParatextProgress {
             }
 
             // Update Status node.
-            let statusArray: projectStatusType[] = task.Status
-            if (statusArray === undefined) {
-              console.warn("Error updating status for " + bookCode + " in phase " + ppPhase + ". Skipping...")
-              continue;
+            if (task.Status === undefined) {
+              console.warn("Warning: Status undefined for " + bookCode + " in phase " + ppPhase + ". Initializing...")
+              task.Status = []
             }
+            let statusArray: projectStatusType[] = task.Status
             // Convert from JSON to JSONArray as needed so we can push new status
             if (!Array.isArray(statusArray)) {
               task.Status = [task.Status]
