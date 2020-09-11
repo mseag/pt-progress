@@ -18,8 +18,7 @@
   "keywords": [
     "excel",
     "paratext",
-    "json",
-    "xml"
+    "word"
   ],
   "author": "SIL International",
   "license": "MIT",
@@ -38,12 +37,12 @@
     "xml2json": "^0.12.0"
   },
   "devDependencies": {
-    "@types/node": "^14.0.13",
-    "@typescript-eslint/eslint-plugin": "^3.4.0",
-    "@typescript-eslint/parser": "^3.4.0",
-    "eslint": "^7.3.1",
+    "@types/node": "^14.10.0",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "eslint": "^7.8.1",
     "nodemon": "^2.0.4",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.7"
   }
 }
