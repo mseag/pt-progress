@@ -1,10 +1,9 @@
 // Copyright 2020 SIL International
 // Types and utilities for updating Paratext progress
-import * as books from "./books";
-import { ExcelProjectStatusType} from "./excelProject";
-import * as phase from "./phase";
-import * as reporting from "./reporting";
-import { StatusMap, Status } from "./status";
+import * as books from './books';
+import * as phase from './phase';
+import * as reporting from './reporting';
+import { ProjectStatusType, StatusMap, Status } from './status';
 
 /**
  * Information to write for updating Paratext status.
@@ -45,13 +44,13 @@ export class ParatextProgress {
   /**
    * Update the assignment and status sections of xmlObj for each Paratext phase.
    * xmlObj is modified during the process.
-   * @param {ExcelProjectStatusType} progressObj   JSON object from the project reports which contains completed info
+   * @param {ProjectStatusType} progressObj   JSON object from the project reports which contains completed info
    * @param {object} xmlObj        JSON object of ProgressProgress.xml which is modified
    * @param {string} user          Paratext user for each updated status element
    * @param {QuarterType|undefined} quarter If specified, only update Paratext status for the matching quarter/year
    * @param {Reporting} reportingInfo Information for the project
    */
-  public update(progressObj: ExcelProjectStatusType, xmlObj: any , user: string,
+  public update(progressObj: ProjectStatusType, xmlObj: any , user: string,
       reportingInfo: reporting.Reporting, quarter: reporting.QuarterType|undefined): void {
     // Fill out progress for the project phase
     // Not using forEach to maintain context

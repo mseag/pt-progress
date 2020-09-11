@@ -1,17 +1,15 @@
 // Copyright 2020 SIL International
 // Utilities to process Excel spreadsheet and write status to JSON file
-import * as fs from "fs";
-import * as books from "./books";
-import * as reporting from "./reporting";
-import {StatusMap, Status} from "./status";
+import * as fs from 'fs';
+import * as books from './books';
+import * as reporting from './reporting';
+import {ProjectStatusType, StatusMap, Status} from './status';
 const excelToJson = require('convert-excel-to-json');
 
 /**
  * Name of the worksheet that contains project status
  */
 const PROGRESS_SHEET = 'Progress';
-
-export type ExcelProjectStatusType = { [code in books.CodeType]? : StatusMap[] };
 
 /**
  * This contains methods for extracting status information
@@ -57,10 +55,10 @@ export class ExcelProject {
    *   "[project name]-[reporting quarter]-[year].json"
    * @param {string} excelFile Path to Excel file
    * @param reportingInfo Project reporting information
-   * @returns {ExcelProjectStatusType} Project status object
+   * @returns {ProjectStatusType} Project status object
    */
   public exportStatus(excelFile: string, reportingInfo: reporting.Reporting) :
-      ExcelProjectStatusType {
+      ProjectStatusType {
     const result = excelToJson({
       sourceFile: excelFile,
       sheets: [{
@@ -100,7 +98,7 @@ export class ExcelProject {
     const END_OF_BOOK_NAMES = 'Other Goals and Milestones';
 
     const b = new books.Books();
-    const resultObj: ExcelProjectStatusType = {};
+    const resultObj: ProjectStatusType = {};
     // Iterate through the progress table and process entries that that contain status
     for(let i = 0; i<result.Progress.length; i++) {
       const bookName = result.Progress[i].bookName;
