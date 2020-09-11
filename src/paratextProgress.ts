@@ -26,7 +26,8 @@ export class ParatextProgress {
    * Note: Paratext seems to use book number 40 for Matthew in the
    * "Assignments and Progress" tables (vs skipping book 40)
    * @param {string} bookCode 3-character book code
-   * @param {number} chapter  Chapter number (0 used for "published" status)
+   * @param {number} chapter  Chapter number (0 used for "published" status
+   *        and marking a book complete)
    * @returns {string}
    */
   public getBookChapterNumber(bookCode: books.CodeType, chapter: number): string {
@@ -54,9 +55,12 @@ export class ParatextProgress {
       reportingInfo: reporting.Reporting, quarter: reporting.QuarterType|undefined): void {
     // Fill out progress for the project phase
     // Not using forEach to maintain context
+    const b = new books.Books;
     const p = new phase.Phase();
     for (const bookKey in progressObj) {
       const bookCode: books.CodeType = bookKey as books.CodeType;
+      const currentBook: books.bookType = b.getBookByCode(bookCode);
+
       const statusArray = progressObj[bookCode] as StatusMap[];
       for(const bookObj of statusArray) {
         for (const phaseKey in bookObj) {
@@ -95,7 +99,7 @@ export class ParatextProgress {
               task.Assignments = [task.Assignments]
               assignmentsArray = task.Assignments;
             }
-            const existingIndex = assignmentsArray.findIndex((el: any) => el.book === bookCode);
+            let existingIndex: number = assignmentsArray.findIndex((el: any) => el.book === bookCode);
             if (existingIndex == -1) {
               // Add new assignment
               const updatedAssignment: any = {};
@@ -147,6 +151,44 @@ export class ParatextProgress {
                 statusArray.push(updatedStatus);
               }
             }
+
+            // Check if entire book can be marked complete
+            let bookComplete = true;
+            for (let ch = 1; ch <= currentBook.chapters; ch++) {
+              const bookChapterNumber = this.getBookChapterNumber(bookCode, ch);
+              existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
+              if (existingIndex == -1 || statusArray[existingIndex].done != "true") {
+                bookComplete = false;
+                break;
+              }
+            }
+
+            if (bookComplete) {
+              // Paratext uses chapter "0" to mark a book complete
+              const bookChapterNumber = this.getBookChapterNumber(bookCode, 0);
+
+              let updatedStatus: projectStatusType;
+              existingIndex = statusArray.findIndex(el => el.bookChapter === bookChapterNumber);
+              if (existingIndex != -1) {
+                // Update existing status to "Done"
+                  if (statusArray[existingIndex].done != "true") {
+                  // no change to bookChapter
+                  statusArray[existingIndex].done = "true";
+                  statusArray[existingIndex].user = user;
+                  statusArray[existingIndex].date = reportingDate
+                  }
+              } else {
+                // Create new status
+                updatedStatus = {
+                  bookChapter: bookChapterNumber,
+                  done: "true",
+                  user: user,
+                  date: reportingDate};
+
+                statusArray.push(updatedStatus);
+              }
+            }
+
           }
         }
       }
