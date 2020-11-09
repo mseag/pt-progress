@@ -96,7 +96,7 @@ Download and install Git
 https://git-scm.com/downloads
 
 ### Install Node.js and TypeScript
-Download and install the latest current version for Node.js (>13.0)
+Download and install the latest current version for Node.js (>14.15.0)
 
 https://nodejs.org/en/download/current/
 

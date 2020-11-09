@@ -43,7 +43,7 @@ if (debugParameters) {
     console.log(`Paratext Project: "${program.project}"`);
   }
   if (program.quarter) {
-    console.log(`Quarter: "${program.quarter}`);
+    console.log(`Quarter: "${program.quarter}"`);
   }
   if (program.user) {
     console.log(`User: "${program.user}"`);
