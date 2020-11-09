@@ -542,6 +542,12 @@ export class Books {
       case 'Dueteronomy':
         bookName = 'Deuteronomy';
         break;
+      case 'Song of Solomon':
+        bookName = 'Song of Songs';
+        break;
+      case 'Zachariah':
+        bookName = 'Zechariah';
+        break;
       case 'I Corinthians':
         bookName = "1 Corinthians";
         break;
