@@ -2,14 +2,16 @@
   "name": "pt-progress",
   "version": "0.1.0",
   "description": "Utility to convert project progress from Excel file to Paratext",
+  "bin": "dist/index.js",
   "main": "dist/index",
   "scripts": {
     "build": "tsc -p .",
     "lint": "eslint . --ext .ts",
-    "publish": "pkg dist/index.js --output pt-progress.exe",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "tsc -w & nodemon -q -w dist"
+    "watch": "tsc -w & nodemon -q -w dist",
+    "copy": "cp ./node_modules/node-expat/build/Release/node_expat.node deploy/",
+    "publish": "npm run-script copy && pkg --out-path deploy/ package.json"
   },
   "repository": {
     "type": "git",
@@ -42,7 +44,17 @@
     "@typescript-eslint/parser": "^3.10.1",
     "eslint": "^7.8.1",
     "nodemon": "^2.0.4",
+    "pkg": "^4.4.9",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7"
+  },
+  "pkg": {
+    "assets": [
+      "src/**/*.ts",
+      "./tsconfig.json"
+    ],
+    "targets": [
+      "node14-win-x64"
+    ]
   }
 }

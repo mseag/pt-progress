@@ -1,14 +1,14 @@
 # Dependencies
 node_modules/
 
-# Test files
+# Sample Office docs for testing
 test/
 
 # Compiled Output files
 dist/
 
-# Output project status files
+# Generated project status files with the name [project]-[quarter]-[year].json
 *-*-*.json
 
-# Publish artifact
-pt-progress.exe
+# Published artifacts
+deploy/

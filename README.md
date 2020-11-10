@@ -96,7 +96,7 @@ Download and install Git
 https://git-scm.com/downloads
 
 ### Install Node.js and TypeScript
-Download and install the latest current version for Node.js (>13.0)
+Download and install the latest current version for Node.js (>=14.15.0)
 
 https://nodejs.org/en/download/current/
 
@@ -129,17 +129,13 @@ Open Folder as a VS Code Project
 Edit your applicable parameters in [launch.json](./.vscode/launch.json). If using Windows paths, you'll need to escape the slashes (e.g. `-p "C:\\somewhere\\to\\paratext-project"`)
 
 ### Publishing pt-progress.exe
-This optional step creates a standalone Windows executable `pt-progress.exe` so it can be run without Node.js.
+This optional step creates a standalone Windows executable `pt-progress.exe` so it can be run without Node.js. Published artifacts will be in the `deploy/` directory.
 
-Install [pkg](https://www.npmjs.com/package/pkg) globally via npm:
-```bash
-npm install -g pkg
-```
-
-Create `pt-progress.exe`.
 ```bash
 npm run-script publish
 ```
+
+This copies the required `node_expat.node` file that must be distributed with the generated executable `pt-progress.exe`.
 
 -------------
 
