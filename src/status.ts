@@ -1,6 +1,7 @@
 // Copyright 2020 SIL International
-// Type for Excel project status that gets saved to JSON.
-// The status can be used to update a Paratext project.
+// Type for Excel, Word, or Paratext project status that gets saved to JSON.
+// The status from Excel/Word can be used to update a Paratext project.
+// The status from Paratext can be exported to Word table.
 import * as books from './books';
 import {PhaseType} from './phase';
 import * as reporting from './reporting';

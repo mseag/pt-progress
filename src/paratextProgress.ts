@@ -1,6 +1,7 @@
 // Copyright 2020 SIL International
-// Types and utilities for updating Paratext progress
+// Types and utilities for interacting with Paratext project progress
 import * as books from './books';
+import * as fs from 'fs';
 import * as phase from './phase';
 import * as reporting from './reporting';
 import { ProjectStatusType, StatusMap, Status } from './status';
@@ -17,9 +18,43 @@ interface projectStatusType {
 }
 
 /**
- * Class to update Paratext project object
+ * Class for handling Paratext project object
  */
 export class ParatextProgress {
+
+  /**
+   * Allocate 2D array for temporary status of the 66 books and 6 phases
+   * @returns {any} 2D array of type stageStatusType
+   */
+  private generateWorkingObj(): any {
+    interface stageStatusType {
+      completed: number[];
+      date?: Date;
+    }
+    const b = new books.Books;
+
+    // 2D array for 66 books x 6 phases each
+    let workingObj: stageStatusType[][] = [];
+
+    // 1-based index to match bookNum
+    for(let bookNum = 1; bookNum <= 66; bookNum++) {
+      workingObj[bookNum] = [];
+      let bookInfo: books.bookType = b.getBookByNumber(bookNum);
+
+      for(let i=0; i<= 5; i++) {
+        // Allocate for each entry (+1 so index can be equal to chapter number)
+        const completedArray: number[] = new Array<number>(bookInfo.chapters+1);
+        let statusObj: stageStatusType = {
+          completed: completedArray
+          // Assign completion date later
+        };
+        workingObj[bookNum][i] = statusObj;
+      }
+    }
+
+    return workingObj;
+  }
+
   /**
    * Given a 3-character book code and chapter number, create a #-# string
    * corresponding to [Paratext book code number]-[chapter number].
@@ -40,6 +75,114 @@ export class ParatextProgress {
     const b = new books.Books;
     const bookInfo = b.getBookByCode(bookCode);
     return `${bookInfo.num}-${chapter}`;
+  }
+
+  /**
+   * Parse the Paratext project progress `xmlObj` and return the status object.
+   * The project status JSON is also written out to a file.
+   * @param {obj} xmlObj JSON object of ProgressProgress.xml
+   * @param {string} projectName
+   * @returns {ProjectStatusType} JSON Object of the project status
+   */
+  public exportStatus(xmlObj: any, projectName: string): ProjectStatusType {
+    // workingObj is an intermediary object used to keep track of completed chapters
+    let workingObj: any = this.generateWorkingObj();
+    const b = new books.Books;
+    const p = new phase.Phase;
+
+    const stages = xmlObj.ProgressInfo.Stages.Stage;
+    if (stages) {
+      stages.forEach((stage: any, stageIndex: number) => {
+        const statusArray = stage.Task.Status;
+        if (statusArray) {
+          statusArray.forEach((status: any, statusIndex: number) => {
+            if (status.done === 'true') {
+              // Process a completed chapter, skipping chapter "0"
+              const [bookNumber, bookChapter] = status.bookChapter.split("-");
+
+              // Special handling for for chapter "0" where we only care about
+              // 'publish' stage if the completion date isn't filled
+              if (bookChapter == 0) {
+                if (p.stageIndexToPhase(stageIndex) === 'publish' &&
+                   !workingObj[bookNumber][stageIndex].date) {
+                  // Mark all the chapters complete
+                  const bt: books.bookType = b.getBookByNumber(bookNumber);
+                  const totalChapters : number = bt.chapters;
+                  workingObj[bookNumber][stageIndex].completed.fill(1, 1, totalChapters+1);
+
+                  // Update the latest completion date
+                  workingObj[bookNumber][stageIndex].date = new Date(status.date);
+                }
+                return;
+              }
+
+              // Mark the completed chapter by adding it to the completed chapter array
+              workingObj[bookNumber][stageIndex].completed[bookChapter] = 1;
+
+              // Update the latest completion date
+              const currentCompletionDate: Date = new Date(status.date);
+              if (!workingObj[bookNumber][stageIndex].date) {
+                workingObj[bookNumber][stageIndex].date = currentCompletionDate;
+              } else if (new Date(status.date) < currentCompletionDate) {
+                status.date = currentCompletionDate;
+              }
+            }
+        });
+        }
+      });
+    } else {
+      console.warn("No Paratext project status found for " + projectName);
+    }
+
+    // Convert the working object into a ProjectStatusType object
+    let progressObj: ProjectStatusType = {};
+
+    // Reducer method to accumulate the number of completed chapters
+    const reducer = (accumulator: number, item: number) => {
+      return accumulator + item;
+    }
+
+    workingObj.forEach(function (bookObj: any, bookIndex: number) {
+      let phaseArray: any[] = [];
+      let bookProgressObj: any = {};
+      const code: books.CodeType = b.getBookByNumber(bookIndex).code;
+
+      bookObj.forEach(function (phaseObj: any, stageIndex: number) {
+        if (phaseObj.date) {
+          const completedChapters: number = phaseObj.completed.reduce(reducer, 0);
+          const dateStr: string = phaseObj.date.toString();
+          const status: Status = new Status(
+            completedChapters,
+            1, // Assume starting with chapter 1
+            reporting.getReportingQuarter(dateStr),
+            reporting.getReportingYear(dateStr)
+          );
+
+          const ph: phase.PhaseType = p.stageIndexToPhase(stageIndex);
+          bookProgressObj[ph] = status
+        }
+      });
+
+      if (Object.keys(bookProgressObj).length > 0) {
+        phaseArray.push(bookProgressObj);
+
+        progressObj[code] = phaseArray;
+      }
+    });
+
+    // Write the status to a file.
+    if (Object.keys(progressObj).length > 0) {
+      const filename = `${projectName}-progress-export.json`;
+      if (fs.existsSync(filename)) {
+        console.warn("Overwriting status file: " + filename);
+      }
+      fs.writeFileSync(filename, JSON.stringify(progressObj, null, 2));
+      console.info("Project status written to " + filename);
+    } else {
+      console.warn("Project progress empty for " + projectName);
+    }
+
+    return progressObj
   }
 
   /**

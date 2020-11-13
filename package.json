@@ -7,7 +7,6 @@
   "scripts": {
     "build": "tsc -p .",
     "lint": "eslint . --ext .ts",
-    "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "tsc -w & nodemon -q -w dist",
     "copy": "cp ./node_modules/node-expat/build/Release/node_expat.node deploy/",
