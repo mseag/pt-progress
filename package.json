@@ -5,6 +5,7 @@
   "bin": "dist/index.js",
   "main": "dist/index",
   "scripts": {
+    "patch": "cp ./types/docx/math-component.d.ts ./node_modules/docx/build/file/paragraph/math",
     "build": "tsc -p .",
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -32,6 +33,7 @@
     "@types/xml2json": "^0.11.3",
     "commander": "^5.1.0",
     "convert-excel-to-json": "^1.7.0",
+    "docx": "5.4.1",
     "path": "^0.12.7",
     "vkbeautify": "^0.99.3",
     "xml-formatter": "^1.2.1",

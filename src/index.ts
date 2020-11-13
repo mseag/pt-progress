@@ -3,6 +3,7 @@
 import * as program from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as docsxTable from './docxTable';
 import * as excelProject from './excelProject';
 import * as paratextProgress from './paratextProgress';
 import { ProjectStatusType } from './status';
@@ -117,6 +118,9 @@ if (program.project) {
     // Convert the data from Paratext to projectObj and export to MS Word table and exit
     const projectName = path.basename(program.project);
     progressObj = p.exportStatus(xmlObj, projectName);
+    if (Object.keys(progressObj).length > 0) {
+      docsxTable.createTable(progressObj, projectName);
+    }
 
     process.exit(1);
   }

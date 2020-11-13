@@ -49,7 +49,7 @@ pt-progress.exe
     -j [path to JSON status file] 
     -u [Paratext user name] 
     -p [Paratext project path]
-````
+```
 
 -----
 
