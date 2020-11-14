@@ -75,9 +75,6 @@ if (program.quarter) {
 // End of parameters
 ////////////////////////////////////////////////////////////////////
 
-let reportingInfo: Reporting;
-let progressObj: ProjectStatusType;
-
 let reportingInfo: Reporting = new Reporting(
   "Invalid", "Q1", "2020");
 let progressObj: ProjectStatusType = { "000": undefined };
