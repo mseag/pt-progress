@@ -49,8 +49,10 @@ This process uses an Excel macro to copy a Word table and save the info to a [JS
         * project name. If there are multiple progress tables in the Word doc, enter the project names in that order.
 4. If there's no errors, the macro will generate a JSON status file.
 
+
 Note on completed status in the table (marked with an "x"): 
 If quarter / year aren't specified, an arbitrary value "Q1" / 2017 is assigned.
+
 ----
 
 ### JSON Status file
@@ -72,6 +74,23 @@ pt-progress.exe
     -u [Paratext user name] 
     -p [Paratext project path]
 ````
+
+-----
+
+### Extracting the Paratext project status and export to MS Word table (does not update Paratext)
+This process parses the Paratext project\'s xml status to a JSON status file
+and exports it to MS Word table.
+
+The JSON status file has a name
+*[Project name]*-progress-export.json
+
+```bash
+pt-progress.exe
+    -p [Paratext project path]
+    -t 
+```
+
+
 
 ### Help
 Obtaining the pt-progress version:

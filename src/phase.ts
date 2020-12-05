@@ -20,7 +20,7 @@ export class Phase {
    * Convert phase to Paratext stage index. Stage index is used to access the
    * <Stages> node in "ProjectProgress.xml"
    * @param {PhaseType} ppPhase
-   * @returns number Corresponding Paratext stage index
+   * @returns {number} Corresponding Paratext stage index
    */
   // Function to convert PP phase to Paratext phase
   public phaseToStageIndex(ppPhase : PhaseType) : number {
@@ -34,6 +34,25 @@ export class Phase {
       default:
         console.error('Invalid phase: ' + ppPhase);
         return -1;
+    }
+  }
+
+  /**
+   * Convert Paratext stage index to phase.
+   * @param {number} Stage index from [0, 5]
+   * @returns {PhaseType}
+   */
+  public stageIndexToPhase(index: number): PhaseType {
+    switch(index) {
+      case 0: return 'exegesis';
+      case 1: return 'team';
+      case 2: return 'advisor';
+      case 3: return 'community';
+      case 4: return 'consultant';
+      case 5: return 'publish';
+      default:
+        console.error('Invalid stage index: ' + index + ', should be from [0, 5]');
+        process.exit(1);
     }
   }
 }
