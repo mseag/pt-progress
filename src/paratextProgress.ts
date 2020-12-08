@@ -262,8 +262,11 @@ export class ParatextProgress {
               statusArray = task.Status;
             }
 
-            const startingCh: number = phaseObj.startingChapter;
-            for (let ch = startingCh; ch < startingCh+phaseObj.chapters; ch++) {
+            // Range check starting and end chapter numbers (starting index 1)
+            const startingCh = Number(phaseObj.startingChapter);
+            const endCh = Math.min(startingCh + Number(phaseObj.chapters), currentBook.chapters+1);
+
+            for (let ch = startingCh; ch < endCh; ch++) {
               let bookChapterNumber: string;
               if (ppPhase === "publish") {
                 // Publishing only deals with Chapter "0":
