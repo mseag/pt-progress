@@ -11,35 +11,11 @@ Reference: [Setting up for Progress](https://paratext.org/2018/01/31/setting-up-
 ## Usage
 Note for developers: Replace `pt-progress.exe` references with `node dist/index.js`.
 
-### Extracting the Excel project status without updating Paratext
-You will need the path to your project's Excel `.xlsm` file (relative to this pt-progress directory)
-
-```bash
-pt-progress.exe
-    -x [path to Excel file]
-```
-
-This will extract the project's "Progress" worksheet and save it to a [JSON status file](#json-status-file).
-
-### Extracting the Excel project status and updating Paratext
-In addition to the Excel project's path, you will need a Paratext user name (that gets written to the status) and 
-the full path to your corresponding Paratext project. By default,
-the Paratext project will be updated with all the status information. 
-If the optional quarter parameter is provided, only that matching quarter/year is updated in Paratext.
-
-```bash
-pt-progress.exe
-    -x [path to Excel file] 
-    -u [Paratext user name] 
-    -q [quarter] 
-    -p [Paratext project path]
-````
-
 -----
 
 ### Extracting the MS Word project status from a table (does not update Paratext)
 This process uses an Excel macro to copy a Word table and save the info to a [JSON status file](#json-status-file).
-1. Open "ImportedReports.xlsm" in Excel and follow the instructions on the "Getting Started" sheet to enable macros
+1. Open "Imported Reports.xlsm" in Excel and follow the instructions on the "Getting Started" sheet to enable macros
 2. Delete any sheets generated from previous runs (they'll have project names)
 3. Run the macro "ImportWordTable"
     1. Browse for the Word `.docx` file to import. If you get an error, make sure the Word file is closed.
@@ -77,9 +53,35 @@ pt-progress.exe
 
 -----
 
+### Extracting the Excel project status without updating Paratext
+You will need the path to your project's Excel `.xlsm` file (relative to this pt-progress directory)
+
+```bash
+pt-progress.exe
+    -x [path to Excel file]
+```
+
+This will extract the project's "Progress" worksheet and save it to a [JSON status file](#json-status-file).
+
+### Extracting the Excel project status and updating Paratext
+In addition to the Excel project's path, you will need a Paratext user name (that gets written to the status) and 
+the full path to your corresponding Paratext project. By default,
+the Paratext project will be updated with all the status information. 
+If the optional quarter parameter is provided, only that matching quarter/year is updated in Paratext.
+
+```bash
+pt-progress.exe
+    -x [path to Excel file] 
+    -u [Paratext user name] 
+    -q [quarter] 
+    -p [Paratext project path]
+````
+
+----
+
 ### Extracting the Paratext project status and export to MS Word table (does not update Paratext)
 This process parses the Paratext project\'s xml status to a JSON status file
-and exports it to MS Word table.
+and exports it to MS Word table. Note: This feature is not fully implemented yet.
 
 The JSON status file has a name
 *[Project name]*-progress-export.json

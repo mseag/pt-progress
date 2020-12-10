@@ -26,7 +26,7 @@ program
   .option("-j, --json <jsonStatusPath>", "path to JSON status file (named project-quarter-year.json)")
   .option("-p, --project <paratextProjectPath>", "path to the Paratext project")
   .option("-q, --quarter <quarter>", "If specified, only update Paratext status for the current quarter [Q1, Q2, Q3, Q4]")
-  .option("-t, --table", "Export a Paratext project progress into MS Word tables")
+  .option("-t, --table", "Export a Paratext project progress into MS Word tables (not implemented yet)")
   .option("-u, --user <name>", "Paratext user name that will be updating the Paratext project status")
   .parse(process.argv);
 
