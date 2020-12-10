@@ -237,35 +237,60 @@ export class ExcelProject {
     const status : StatusMap = {};
     const startingChapter: number = bookEntry.startingChapter;
     // Can't for loop since columns have unique names
-    if (bookEntry.exegesisQuarter && bookEntry.exegesisYear) {
-      status.exegesis = this.completedChaptersInQuarter(
-        reportingInfo, bookInfo, startingChapter,
-        bookEntry.exegesisQuarter as reporting.QuarterType, bookEntry.exegesisYear, bookEntry.verses);
+    if (bookEntry.exegesisQuarter) {
+      if (bookEntry.exegesisYear) {
+        status.exegesis = this.completedChaptersInQuarter(
+          reportingInfo, bookInfo, startingChapter,
+          bookEntry.exegesisQuarter as reporting.QuarterType, bookEntry.exegesisYear, bookEntry.verses);
+      } else {
+        console.warn("Warning: " + bookName + " (Exegesis) year empty");
+      }
     }
-    if (bookEntry.teamQuarter && bookEntry.teamYear) {
-      status.team = this.completedChaptersInQuarter(
-        reportingInfo, bookInfo, startingChapter,
-        bookEntry.teamQuarter, bookEntry.teamYear, bookEntry.verses);
+    if (bookEntry.teamQuarter) {
+      if (bookEntry.teamYear) {
+        status.team = this.completedChaptersInQuarter(
+          reportingInfo, bookInfo, startingChapter,
+          bookEntry.teamQuarter, bookEntry.teamYear, bookEntry.verses);
+        } else {
+          console.warn("Warning: " + bookName + " (Team Check) year empty");
+        }
     }
-    if (bookEntry.advisorQuarter && bookEntry.advisorYear) {
-      status.advisor = this.completedChaptersInQuarter(
-        reportingInfo, bookInfo, startingChapter,
-        bookEntry.advisorQuarter, bookEntry.advisorYear, bookEntry.verses);
+    if (bookEntry.advisorQuarter) {
+      if (bookEntry.advisorYear) {
+        status.advisor = this.completedChaptersInQuarter(
+          reportingInfo, bookInfo, startingChapter,
+          bookEntry.advisorQuarter, bookEntry.advisorYear, bookEntry.verses);
+      } else {
+        console.warn("Warning: " + bookName + " (Advisor Check) year empty");
+      }
     }
-    if (bookEntry.communityQuarter && bookEntry.communityYear) {
-      status.community = this.completedChaptersInQuarter(
-        reportingInfo, bookInfo, startingChapter,
-        bookEntry.communityQuarter, bookEntry.communityYear, bookEntry.verses);
+    if (bookEntry.communityQuarter) {
+      if (bookEntry.communityYear) {
+        status.community = this.completedChaptersInQuarter(
+          reportingInfo, bookInfo, startingChapter,
+          bookEntry.communityQuarter, bookEntry.communityYear, bookEntry.verses);
+      } else {
+        console.warn("Warning: " + bookName + " (Community Testing) year empty");
+      }
     }
-    if (bookEntry.consultantQuarter && bookEntry.consultantYear) {
-      status.consultant = this.completedChaptersInQuarter(
-        reportingInfo, bookInfo, startingChapter,
-        bookEntry.consultantQuarter, bookEntry.consultantYear, bookEntry.verses);
+    if (bookEntry.consultantQuarter) {
+      if (bookEntry.consultantYear) {
+        status.consultant = this.completedChaptersInQuarter(
+          reportingInfo, bookInfo, startingChapter,
+          bookEntry.consultantQuarter, bookEntry.consultantYear, bookEntry.verses);
+      } else {
+        console.warn("Warning: " + bookName + " (Consultant Checked) year empty");
+
+      }
     }
-    if (bookEntry.publishQuarter && bookEntry.publishYear) {
-      status.publish = this.completedChaptersInQuarter(
-        reportingInfo, bookInfo, startingChapter,
-        bookEntry.publishQuarter, bookEntry.publishYear, bookEntry.verses);
+    if (bookEntry.publishQuarter) {
+      if (bookEntry.publishYear) {
+        status.publish = this.completedChaptersInQuarter(
+          reportingInfo, bookInfo, startingChapter,
+          bookEntry.publishQuarter, bookEntry.publishYear, bookEntry.verses);
+      } else {
+        console.warn("Warning: " + bookName + " (Published) year empty");
+      }
     }
 
     return status;
