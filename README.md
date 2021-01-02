@@ -49,7 +49,7 @@ pt-progress.exe
     -j [path to JSON status file] 
     -u [Paratext user name] 
     -p [Paratext project path]
-````
+```
 
 -----
 
@@ -109,26 +109,27 @@ pt-progress.exe -h
 
 
 ## Developer Setup
-These utilities require Excel, Git, Node.js and TypeScript.
+These utilities require MS Excel, Word, Git, Node.js, and TypeScript (installed locally).
 
 ### Install Git
 Download and install Git
 
 https://git-scm.com/downloads
 
-### Install Node.js and TypeScript
+### Install Node.js and Dependencies
 Download and install the latest current version for Node.js (>=14.15.0)
 
 https://nodejs.org/en/download/current/
 
-After installing Node.js, reboot your PC, open Git Bash to this directory and install [TypeScript](https://www.typescriptlang.org/) globally via npm:
-```
-npm install -g typescript
-```
-
-Then install this project's dependencies:
+After installing Node.js, reboot your PC, open Git Bash to this directory and install this project's dependencies:
 ```bash
 npm install
+```
+
+This will install [TypeScript](https://www.typescriptlang.org/) locally and can be accessed with
+
+```bash
+npx tsc
 ```
 
 ### Compiling pt-progress
