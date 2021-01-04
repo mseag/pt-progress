@@ -14,11 +14,11 @@
         "${workspaceFolder}/dist/**.js"
       ],
       "args": [
+        "-d", "./test/table report.docx",
         //"-x", "./test/MEP q4 2019 19419.xlsm",
-        //"-u", "Darcy Wong",
+        //"-u", "Kermit",
         //"-q", "Q3", 
-        //"-p", "C:\\My Paratext 9 Projects\\MEP"
-        "-p", "C:\\My Paratext 9 Projects\\PTP_test"
+        "-p", "C:\\My Paratext 9 Projects\\MEP"
       ]
     }
   ]

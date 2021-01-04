@@ -7,10 +7,12 @@ import * as excelProject from './excelProject';
 import * as paratextProgress from './paratextProgress';
 import { ProjectStatusType } from './status';
 import { Reporting, isQuarter } from './reporting';
+//import * as docxTables from 'docx-tables';
 import * as xmlParser from 'xml2json';
 import * as vkbeautify from 'vkbeautify';
 import * as jsonStatus from './jsonStatus';
 const {version} = require('../package.json');
+const Docx = require("docx4js");
 
 // TODO: Use docx-tables or mammoth to parse .docx files
 
@@ -23,6 +25,7 @@ program
     "The status is written to a file [project name]-[reporting quarter]-[reporting year].json and " +
     "2) take a JSON status file to update the Paratext progress.")
   .option("-x, --xlsm <excelProjectPath>", "path to P&P Excel spreadsheet")
+  .option("-d, --docx <MS Word doc path>", "path to MS Word report")
   .option("-j, --json <jsonStatusPath>", "path to JSON status file (named project-quarter-year.json)")
   .option("-p, --project <paratextProjectPath>", "path to the Paratext project")
   .option("-q, --quarter <quarter>", "If specified, only update Paratext status for the current quarter [Q1, Q2, Q3, Q4]")
@@ -37,6 +40,9 @@ if (debugParameters) {
   console.log('Parameters:');
   if (options.xlsm) {
     console.log(`P&P Excel file: "${options.xlsm}"`);
+  }
+  if (options.docx) {
+    console.log(`MS Word report file: "${options.docx}"`);
   }
   if (options.json) {
     console.log(`JSON file: "${options.json}"`);
@@ -56,9 +62,13 @@ if (debugParameters) {
   console.log('\n');
 }
 
-// Check if Excel/JSON file exists
+// Check if Excel/MS Word/JSON file exists
 if (options.xlsm && !fs.existsSync(options.xlsm)) {
   console.error("Can't open P&P Excel file " + options.xlsm);
+  process.exit(1);
+}
+if (options.docx && !fs.existsSync(options.docx)) {
+  console.error("Can't open MS Word file " + options.docx);
   process.exit(1);
 }
 if (options.json && !fs.existsSync(options.json)) {
@@ -80,6 +90,18 @@ if (options.quarter) {
 let reportingInfo: Reporting = new Reporting(
   "Invalid", "Q1", 2020);
 let progressObj: ProjectStatusType = { "000": undefined };
+
+
+// Test code to get table
+const one = new Promise<any>((resolve, reject) => {
+  resolve('Hello');
+}).then(resolve => {
+  console.log(resolve);
+  return;
+});
+Docx.load(options.docx).then(one);
+process.exit(1);
+
 
 if (options.xlsm) {
   // Determine the reporting quarter and year from the Excel file
