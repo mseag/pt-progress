@@ -1,6 +1,6 @@
 
 # pt-progress
-Utilities to transfer a project's status from an MS Office document of either:
+Utilities to transfer a project's quarterly report status from an MS Office document of either:
   * "Progress" sheet from a "**Planning & Progress**" Excel spreadsheet
   * MS Word file
 
@@ -162,5 +162,5 @@ This copies the required `node_expat.node` file that must be distributed with th
 -------------
 
 ## License
-Copyright (c) 2020 SIL International. All rights reserved.
+Copyright (c) 2020-2021 SIL International. All rights reserved.
 Licensed under the [MIT license](LICENSE).

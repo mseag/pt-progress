@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Copyright 2020 SIL International
+// Copyright 2020-2021 SIL International
 import * as program from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -19,7 +19,7 @@ const {version} = require('../package.json');
 ////////////////////////////////////////////////////////////////////
 program
   .version(version, '-v, --version', 'output the current version')
-  .description("Utilities to 1) parse the status from the \"Progress\" sheet of a P&P Excel spreadsheet. " +
+  .description("Utilities to 1) parse a quarterly report from the \"Progress\" sheet of a P&P Excel spreadsheet. " +
     "The status is written to a file [project name]-[reporting quarter]-[reporting year].json and " +
     "2) take a JSON status file to update the Paratext progress.")
   .option("-x, --xlsm <excelProjectPath>", "path to P&P Excel spreadsheet")
