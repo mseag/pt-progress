@@ -114,7 +114,8 @@ export function getReportingYear(dateString: string): number {
 /**
  * Return an ISO 8601 local timestamp.
  * Instead of getting current date with moment().format(), generate the reporting
- * which will be the 28th of the final month in the reporting quarter
+ * which will be the 28th of the final month in the reporting quarter.
+ * Note: Oct-Dec counts as `Q1` of the previous year.
  * Also assigning an arbitrary time
  * @param {Reporting} reporting - Project information
  * @returns {string} ISO 8601 date
@@ -123,7 +124,9 @@ export function getReportingDate(reporting: Reporting): string {
   const REPORTING_TIME = "09:19:56.0972475+07:00"
 
   if (reporting.year && reporting.month) {
-    const reportingDate = `${reporting.year}-${reporting.month}-28T${REPORTING_TIME}`;
+    let year = 0;
+    year = parseInt(reporting.month) >= 10 ? parseInt(reporting.year) - 1 : parseInt(reporting.year);
+    const reportingDate = `${year}-${reporting.month}-28T${REPORTING_TIME}`;
     return reportingDate;
   }
 

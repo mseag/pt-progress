@@ -269,9 +269,12 @@ export class ParatextProgress {
             for (let ch = startingCh; ch < endCh; ch++) {
               let bookChapterNumber: string;
               if (ppPhase === "publish") {
-                // Publishing only deals with Chapter "0":
-                // Could optimize this to not happen for each chapter
-                bookChapterNumber = this.getBookChapterNumber(bookCode, 0);
+                // Publishing is treated as Chapter "0", so only process the startingCh:
+                if (ch == startingCh) {
+                  bookChapterNumber = this.getBookChapterNumber(bookCode, 0);
+                } else {
+                  continue;
+                }
               } else {
                 bookChapterNumber = this.getBookChapterNumber(bookCode, ch);
               }
@@ -298,6 +301,7 @@ export class ParatextProgress {
               }
             }
 
+            /* Disabled because this was erroneously marking books as "Published"
             // Check if entire book can be marked complete
             let bookComplete = true;
             for (let ch = 1; ch <= currentBook.chapters; ch++) {
@@ -334,7 +338,7 @@ export class ParatextProgress {
                 statusArray.push(updatedStatus);
               }
             }
-
+            */
           }
         }
       }
