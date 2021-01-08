@@ -52,6 +52,7 @@ if (debugParameters) {
   if (program.user) {
     console.log(`User: "${program.user}"`);
   }
+  console.log('\n');
 }
 
 // Check if Excel/JSON file exists
@@ -92,7 +93,12 @@ if (program.xlsm) {
   reportingInfo = jStatus.getReportingInfo(program.json);
 
   // Get the project status from the JSON file
-  progressObj = jStatus.loadStatus(program.json, reportingInfo);
+  try {
+    progressObj = jStatus.loadStatus(program.json, reportingInfo);
+  } catch (e) {
+    console.error("Invalid JSON file. Exiting")
+    process.exit(1);
+  }
 } else if (!program.table) {
   console.warn("No Excel or JSON path given. Exiting");
   process.exit(1);
@@ -129,16 +135,16 @@ if (program.project) {
     p.update(progressObj, xmlObj, program.user, reportingInfo, program.quarter);
 
     // Convert xmlObj to XML and beautify before writing
-  const xmlOptions = {
-    sanitize: true,
-    ignoreNull: false
-  };
-  let updatedData = xmlParser.toXml(xmlObj, xmlOptions);
-  updatedData = vkbeautify.xml(updatedData, 2);
+    const xmlOptions = {
+      sanitize: true,
+      ignoreNull: false
+    };
+    let updatedData = xmlParser.toXml(xmlObj, xmlOptions);
+    updatedData = vkbeautify.xml(updatedData, 2);
 
-  // xmlParser loses the XML tags so prepend when writing back to file
-  const XML_HEADER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    fs.writeFileSync(projectProgressFilename, XML_HEADER + updatedData);
-    console.info(`Project ${reportingInfo.projectName} updates written to ${projectProgressFilename}`);
+    // xmlParser loses the XML tags so prepend when writing back to file
+    const XML_HEADER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+      fs.writeFileSync(projectProgressFilename, XML_HEADER + updatedData);
+      console.info(`SUCCESS! Project ${reportingInfo.projectName} updates written to ${projectProgressFilename}`);
   }
 }
