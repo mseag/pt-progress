@@ -67,7 +67,8 @@ export class ParatextProgress {
    */
   public getBookChapterNumber(bookCode: books.CodeType, chapter: number): string {
     if (chapter < 0) {
-      console.warn('getBookChapterNumber() called with negative chapter ' + chapter);
+      console.warn('getBookChapterNumber() called with negative chapter: ' + chapter +
+      ' for book code: ' + bookCode);
     }
     if (bookCode === '000') {
       console.warn('getBookChapterNumber() called with placeholder book code');

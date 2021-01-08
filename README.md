@@ -55,11 +55,11 @@ pt-progress.exe
 
 You can also use the "Imported Reports.xlsm" file
 1. From the *Setup* sheet, enter the following information (green shaded fields)
-    a. Paratext username which will appear in the "Assignments and Progress" status
-    b. Location of Paratext project's folder
-    c. Location of JSON status file (generated from the "Export Quarterly Report Status" button above)
-    d. Location of the pt-progress.exe file
-    e. Click the "Update Paratext Progress" button
+    * Paratext username which will appear in the "Assignments and Progress" status
+    * Location of Paratext project's folder
+    * Location of JSON status file (generated from the "Export Quarterly Report Status" button above)
+    * Location of the pt-progress.exe file
+    * Click the "Update Paratext Progress" button
 2. If there are no errors, the macro will update the Paratext progress
 
 -----
