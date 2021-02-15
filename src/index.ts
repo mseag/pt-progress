@@ -31,42 +31,43 @@ program
   .parse(process.argv);
 
 // Debugging parameters
+const options = program.opts();
 const debugParameters = true;
 if (debugParameters) {
   console.log('Parameters:');
-  if (program.xlsm) {
-    console.log(`P&P Excel file: "${program.xlsm}"`);
+  if (options.xlsm) {
+    console.log(`P&P Excel file: "${options.xlsm}"`);
   }
-  if (program.json) {
-    console.log(`JSON file: "${program.json}"`);
+  if (options.json) {
+    console.log(`JSON file: "${options.json}"`);
   }
-  if (program.project) {
-    console.log(`Paratext Project: "${program.project}"`);
+  if (options.project) {
+    console.log(`Paratext Project: "${options.project}"`);
   }
-  if (program.quarter) {
-    console.log(`Quarter: "${program.quarter}"`);
+  if (options.quarter) {
+    console.log(`Quarter: "${options.quarter}"`);
   }
-  if (program.table) {
+  if (options.table) {
     console.log(`Export progress to MS Word Table`);
   }
-  if (program.user) {
-    console.log(`User: "${program.user}"`);
+  if (options.user) {
+    console.log(`User: "${options.user}"`);
   }
   console.log('\n');
 }
 
 // Check if Excel/JSON file exists
-if (program.xlsm && !fs.existsSync(program.xlsm)) {
-  console.error("Can't open P&P Excel file " + program.xlsm);
+if (options.xlsm && !fs.existsSync(options.xlsm)) {
+  console.error("Can't open P&P Excel file " + options.xlsm);
   process.exit(1);
 }
-if (program.json && !fs.existsSync(program.json)) {
-  console.error("Can't open JSON file " + program.json);
+if (options.json && !fs.existsSync(options.json)) {
+  console.error("Can't open JSON file " + options.json);
   process.exit(1);
 }
 
-if (program.quarter) {
-  if (!isQuarter(program.quarter)) {
+if (options.quarter) {
+  if (!isQuarter(options.quarter)) {
     console.error(`Quarter needs to be one of [Q1, Q2, Q3, Q4]`);
     process.exit(1);
   }
@@ -80,35 +81,35 @@ let reportingInfo: Reporting = new Reporting(
   "Invalid", "Q1", "2020");
 let progressObj: ProjectStatusType = { "000": undefined };
 
-if (program.xlsm) {
+if (options.xlsm) {
   // Determine the reporting quarter and year from the Excel file
   const ep = new excelProject.ExcelProject();
-  reportingInfo = ep.getReportingInfo(program.xlsm);
+  reportingInfo = ep.getReportingInfo(options.xlsm);
 
   // Get the project status from the Excel file
-  progressObj = ep.exportStatus(program.xlsm, reportingInfo);
-} else if (program.json) {
+  progressObj = ep.exportStatus(options.xlsm, reportingInfo);
+} else if (options.json) {
   // Determine the reporting quarter and year from the JSON file
   const jStatus = new jsonStatus.JsonStatus();
-  reportingInfo = jStatus.getReportingInfo(program.json);
+  reportingInfo = jStatus.getReportingInfo(options.json);
 
   // Get the project status from the JSON file
   try {
-    progressObj = jStatus.loadStatus(program.json, reportingInfo);
+    progressObj = jStatus.loadStatus(options.json, reportingInfo);
   } catch (e) {
     console.error("Invalid JSON file. Exiting")
     process.exit(1);
   }
-} else if (!program.table) {
+} else if (!options.table) {
   console.warn("No Excel or JSON path given. Exiting");
   process.exit(1);
 }
 
 // If Paratext user name and project path given, update Paratext progress
-if (program.project) {
+if (options.project) {
   // Check if Paratext project exists
   const PARATEXT_PROJECT_PROGRESS = "ProjectProgress.xml";
-  const projectProgressFilename = path.join(program.project, PARATEXT_PROJECT_PROGRESS);
+  const projectProgressFilename = path.join(options.project, PARATEXT_PROJECT_PROGRESS);
   if (!fs.existsSync(projectProgressFilename)) {
     console.error("Can't find Paratext file: " + projectProgressFilename);
     process.exit(1)
@@ -119,20 +120,20 @@ if (program.project) {
   const xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
 
   const p = new paratextProgress.ParatextProgress();
-  if (program.table) {
+  if (options.table) {
     // Convert the data from Paratext to projectObj and export to MS Word table and exit
-    const projectName = path.basename(program.project);
+    const projectName = path.basename(options.project);
     progressObj = p.exportStatus(xmlObj, projectName);
 
     process.exit(1);
   }
 
-  if (program.user) {
+  if (options.user) {
     // Make a backup of existing ProjectProgress.xml file
     fs.copyFileSync(projectProgressFilename, projectProgressFilename + ".bak");
 
     // Update Paratext progress
-    p.update(progressObj, xmlObj, program.user, reportingInfo, program.quarter);
+    p.update(progressObj, xmlObj, options.user, reportingInfo, options.quarter);
 
     // Convert xmlObj to XML and beautify before writing
     const xmlOptions = {
