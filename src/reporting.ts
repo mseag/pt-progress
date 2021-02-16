@@ -1,4 +1,4 @@
-// Copyright 2020 SIL International
+// Copyright 2020-2021 SIL International
 // Types and methods for handling P&P Excel spreadsheet
 
 /**

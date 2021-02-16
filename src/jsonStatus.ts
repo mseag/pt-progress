@@ -1,4 +1,4 @@
-// Copyright 2020 SIL International
+// Copyright 2020-2021 SIL International
 import * as fs from 'fs';
 import * as path from 'path';
 import * as reporting from './reporting';

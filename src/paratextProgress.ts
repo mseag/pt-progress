@@ -1,4 +1,4 @@
-// Copyright 2020 SIL International
+// Copyright 2020-2021 SIL International
 // Types and utilities for interacting with Paratext project progress
 import * as books from './books';
 import * as fs from 'fs';

@@ -1,4 +1,4 @@
-// Copyright 2020 SIL International
+// Copyright 2020-2021 SIL International
 // Utilities to process Excel spreadsheet and write status to JSON file
 import * as fs from 'fs';
 import * as books from './books';
