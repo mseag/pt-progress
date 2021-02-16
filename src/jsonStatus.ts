@@ -32,7 +32,7 @@ export class JsonStatus {
       process.exit(1);
     }
     const year: string = components[2];
-    return new reporting.Reporting(projectTitle, quarter, year);
+    return new reporting.Reporting(projectTitle, quarter, parseInt(year));
   }
 
   /**

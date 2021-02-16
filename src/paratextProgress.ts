@@ -214,12 +214,12 @@ export class ParatextProgress {
           // If quarter defined, only handle current reporting quarter & year
           if ((quarter === undefined) || (quarter &&
               phaseObj.quarter === reportingInfo.quarter &&
-              phaseObj.year === parseInt(reportingInfo.year))) {
+              phaseObj.year === reportingInfo.year)) {
 
             const phaseReportingInfo: reporting.Reporting = new reporting.Reporting(
               reportingInfo.projectName,
               phaseObj.quarter,
-              phaseObj.year.toString());
+              phaseObj.year);
             const reportingDate = reporting.getReportingDate(phaseReportingInfo);
             const stageIndex: number = p.phaseToStageIndex(ppPhase);
 

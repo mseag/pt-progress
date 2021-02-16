@@ -78,7 +78,7 @@ if (options.quarter) {
 ////////////////////////////////////////////////////////////////////
 
 let reportingInfo: Reporting = new Reporting(
-  "Invalid", "Q1", "2020");
+  "Invalid", "Q1", 2020);
 let progressObj: ProjectStatusType = { "000": undefined };
 
 if (options.xlsm) {
