@@ -6,8 +6,8 @@ import * as path from 'path';
 import * as excelProject from './excelProject';
 import * as paratextProgress from './paratextProgress';
 import { ProjectStatusType } from './status';
-import { Reporting, isQuarter } from './reporting';
-import * as xmlParser from 'xml2json';
+import { Reporting } from './reporting';
+import * as convert from 'xml-js';
 import * as vkbeautify from 'vkbeautify';
 import * as jsonStatus from './jsonStatus';
 const {version} = require('../package.json');
@@ -106,7 +106,7 @@ if (options.project) {
 
   // Read existing ProjectProgress.xml into xmlObj which will get updated
   const projectProgressData = fs.readFileSync(projectProgressFilename, 'utf-8');
-  const xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
+  const xmlObj = convert.xml2js(projectProgressData, {compact: true})
 
   const p = new paratextProgress.ParatextProgress();
   if (options.table) {
@@ -126,15 +126,16 @@ if (options.project) {
 
     // Convert xmlObj to XML and beautify before writing
     const xmlOptions = {
-      sanitize: true,
-      ignoreNull: false
+      compact: true,
+      fullTagEmptyElement: false,
+      ignoreComment: true,
+      spaces: 4
     };
-    let updatedData = xmlParser.toXml(xmlObj, xmlOptions);
+    let updatedData = convert.js2xml(xmlObj, xmlOptions);
     updatedData = vkbeautify.xml(updatedData, 2);
 
-    // xmlParser loses the XML tags so prepend when writing back to file
-    const XML_HEADER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-      fs.writeFileSync(projectProgressFilename, XML_HEADER + updatedData);
-      console.info(`SUCCESS! Project ${reportingInfo.projectName} updates written to ${projectProgressFilename}`);
+    // Write the XML to file
+    fs.writeFileSync(projectProgressFilename, updatedData);
+    console.info(`SUCCESS! Project ${reportingInfo.projectName} updates written to ${projectProgressFilename}`);
   }
 }
