@@ -79,13 +79,11 @@ This will extract the project's "Progress" worksheet and save it to a [JSON stat
 In addition to the Excel project's path, you will need a Paratext user name (that gets written to the status) and 
 the full path to your corresponding Paratext project. By default,
 the Paratext project will be updated with all the status information. 
-If the optional quarter parameter is provided, only that matching quarter/year is updated in Paratext.
 
 ```bash
 pt-progress.exe
     -x [path to Excel file] 
     -u [Paratext user name] 
-    -q [quarter] 
     -p [Paratext project path]
 ```
 

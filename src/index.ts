@@ -25,7 +25,6 @@ program
   .option("-x, --xlsm <excelProjectPath>", "path to P&P Excel spreadsheet")
   .option("-j, --json <jsonStatusPath>", "path to JSON status file (named project-quarter-year.json)")
   .option("-p, --project <paratextProjectPath>", "path to the Paratext project")
-  .option("-q, --quarter <quarter>", "If specified, only update Paratext status for the current quarter [Q1, Q2, Q3, Q4]")
   .option("-t, --table", "Export a Paratext project progress into MS Word tables (not implemented yet)")
   .option("-u, --user <name>", "Paratext user name that will be updating the Paratext project status")
   .parse(process.argv);
@@ -44,9 +43,6 @@ if (debugParameters) {
   if (options.project) {
     console.log(`Paratext Project: "${options.project}"`);
   }
-  if (options.quarter) {
-    console.log(`Quarter: "${options.quarter}"`);
-  }
   if (options.table) {
     console.log(`Export progress to MS Word Table`);
   }
@@ -64,13 +60,6 @@ if (options.xlsm && !fs.existsSync(options.xlsm)) {
 if (options.json && !fs.existsSync(options.json)) {
   console.error("Can't open JSON file " + options.json);
   process.exit(1);
-}
-
-if (options.quarter) {
-  if (!isQuarter(options.quarter)) {
-    console.error(`Quarter needs to be one of [Q1, Q2, Q3, Q4]`);
-    process.exit(1);
-  }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -95,7 +84,7 @@ if (options.xlsm) {
 
   // Get the project status from the JSON file
   try {
-    progressObj = jStatus.loadStatus(options.json, reportingInfo);
+    progressObj = jStatus.loadStatus(options.json);
   } catch (e) {
     console.error("Invalid JSON file. Exiting")
     process.exit(1);
@@ -133,7 +122,7 @@ if (options.project) {
     fs.copyFileSync(projectProgressFilename, projectProgressFilename + ".bak");
 
     // Update Paratext progress
-    p.update(progressObj, xmlObj, options.user, reportingInfo, options.quarter);
+    p.update(progressObj, xmlObj, options.user, reportingInfo);
 
     // Convert xmlObj to XML and beautify before writing
     const xmlOptions = {

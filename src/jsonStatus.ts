@@ -39,9 +39,8 @@ export class JsonStatus {
    * Load a project's JSON status file
    * @param {string} jsonFile Path to the JSON file
    * @param {reporting.Reporting} reportingInfo
-   * @returns {ProjectStatusType} Project status object
    */
-  public loadStatus(jsonFile: string, reportingInfo: reporting.Reporting) :
+  public loadStatus(jsonFile: string) :
       ProjectStatusType {
     const rawdata = fs.readFileSync(jsonFile).toString();
     const projectStatus: ProjectStatusType = JSON.parse(rawdata);
