@@ -39,9 +39,9 @@ export class Reporting {
   projectName: string;
   month: string;        // month number as a string
   quarter: QuarterType; // reporting quarter
-  year: string;         // 4-digit year
+  year: number;         // 4-digit year
 
-  constructor(projectName: string, quarter: QuarterType, year: string) {
+  constructor(projectName: string, quarter: QuarterType, year: number) {
     this.projectName = projectName;
     this.month = this.QuarterToMonth(quarter);
     this.quarter = quarter;
@@ -125,7 +125,7 @@ export function getReportingDate(reporting: Reporting): string {
 
   if (reporting.year && reporting.month) {
     let year = 0;
-    year = parseInt(reporting.month) >= 10 ? parseInt(reporting.year) - 1 : parseInt(reporting.year);
+    year = parseInt(reporting.month) >= 10 ? reporting.year - 1 : reporting.year;
     const reportingDate = `${year}-${reporting.month}-28T${REPORTING_TIME}`;
     return reportingDate;
   }

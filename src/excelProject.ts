@@ -44,7 +44,7 @@ export class ExcelProject {
     }
     const quarter: reporting.QuarterType = result.Progress[1].AA;
     const year: string = result.Progress[1].AB;
-    return new reporting.Reporting(projectTitle, quarter, year);
+    return new reporting.Reporting(projectTitle, quarter, parseInt(year));
   }
 
   /**
@@ -121,7 +121,7 @@ export class ExcelProject {
 
         // If previous row was the same book, also update 'startingChapter'
         if (i>0 && result.Progress[i-1] && (bookName === result.Progress[i-1].bookName) &&
-        result.Progress[i].startingChapter && result.Progress[i-1].chaptersForUnit) {
+            result.Progress[i].startingChapter && result.Progress[i-1].chaptersForUnit) {
           result.Progress[i].startingChapter =
             result.Progress[i-1].startingChapter + result.Progress[i-1].chaptersForUnit;
         }
@@ -130,17 +130,17 @@ export class ExcelProject {
       // Process each book for phase statuses.
       // Because a project plan may split a book into several units of work,
       // the status for each entry gets appended into an array.
-      const bookStatus: StatusMap = this.parseBookStatus(reportingInfo, result.Progress[i])
-      if (bookStatus && Object.keys(bookStatus).length > 0) {
+      const bookStatus: StatusMap[] = this.parseBookStatus(reportingInfo, result.Progress[i])
+      if (bookStatus && bookStatus.length > 0) {
         let statusArray: StatusMap[] = [];
         if (bookInfo.code in resultObj) {
           // Get existing status
           statusArray = resultObj[bookInfo.code] as StatusMap[];
-        } else {
-          resultObj[bookInfo.code] = statusArray;
         }
+
         // Append the book status
-        statusArray.push(bookStatus);
+        statusArray = statusArray.concat(bookStatus);
+        resultObj[bookInfo.code] = statusArray;
       }
     }
 
@@ -227,57 +227,67 @@ export class ExcelProject {
    * status information (quarter, year), a status object {status.Status} is created.
    * @param {reporting.Reporting} reportingInfo Project information
    * @param {Object} bookEntry Cells from the row denoting status for each phase
-   * @returns {StatusMap} status consisting of phase, quarter, year, and completed chapters
+   * @returns StatusMap[] array status consisting of phase, quarter, year, and completed chapters
    */
-  private parseBookStatus(reportingInfo: reporting.Reporting, bookEntry: any) : StatusMap {
+  private parseBookStatus(reportingInfo: reporting.Reporting, bookEntry: any) : StatusMap[] {
     const bookName = bookEntry.bookName;
     const b = new books.Books;
     const bookInfo = b.getBookByName(bookName);
 
-    const status : StatusMap = {};
+    const statusArray : StatusMap[] = [];
     const startingChapter: number = bookEntry.startingChapter;
     // Can't for loop since columns have unique names
     if (bookEntry.exegesisQuarter) {
       if (bookEntry.exegesisYear) {
-        status.exegesis = this.completedChaptersInQuarter(
-          reportingInfo, bookInfo, startingChapter,
-          bookEntry.exegesisQuarter as reporting.QuarterType, bookEntry.exegesisYear, bookEntry.verses);
+        statusArray.push(
+          {"exegesis" : this.completedChaptersInQuarter(
+            reportingInfo, bookInfo, startingChapter,
+            bookEntry.exegesisQuarter as reporting.QuarterType, bookEntry.exegesisYear, bookEntry.verses)
+          });
       } else {
         console.warn("Warning: " + bookName + " (Exegesis) year empty");
       }
     }
     if (bookEntry.teamQuarter) {
       if (bookEntry.teamYear) {
-        status.team = this.completedChaptersInQuarter(
-          reportingInfo, bookInfo, startingChapter,
-          bookEntry.teamQuarter, bookEntry.teamYear, bookEntry.verses);
+        statusArray.push(
+          {"team": this.completedChaptersInQuarter(
+            reportingInfo, bookInfo, startingChapter,
+            bookEntry.teamQuarter, bookEntry.teamYear, bookEntry.verses)
+          });
         } else {
           console.warn("Warning: " + bookName + " (Team Check) year empty");
         }
     }
     if (bookEntry.advisorQuarter) {
       if (bookEntry.advisorYear) {
-        status.advisor = this.completedChaptersInQuarter(
-          reportingInfo, bookInfo, startingChapter,
-          bookEntry.advisorQuarter, bookEntry.advisorYear, bookEntry.verses);
+        statusArray.push(
+          {"advisor" : this.completedChaptersInQuarter(
+            reportingInfo, bookInfo, startingChapter,
+            bookEntry.advisorQuarter, bookEntry.advisorYear, bookEntry.verses)
+          });
       } else {
         console.warn("Warning: " + bookName + " (Advisor Check) year empty");
       }
     }
     if (bookEntry.communityQuarter) {
       if (bookEntry.communityYear) {
-        status.community = this.completedChaptersInQuarter(
-          reportingInfo, bookInfo, startingChapter,
-          bookEntry.communityQuarter, bookEntry.communityYear, bookEntry.verses);
+        statusArray.push(
+          {"community" : this.completedChaptersInQuarter(
+            reportingInfo, bookInfo, startingChapter,
+            bookEntry.communityQuarter, bookEntry.communityYear, bookEntry.verses)
+          });
       } else {
         console.warn("Warning: " + bookName + " (Community Testing) year empty");
       }
     }
     if (bookEntry.consultantQuarter) {
       if (bookEntry.consultantYear) {
-        status.consultant = this.completedChaptersInQuarter(
-          reportingInfo, bookInfo, startingChapter,
-          bookEntry.consultantQuarter, bookEntry.consultantYear, bookEntry.verses);
+        statusArray.push(
+          {"consultant" : this.completedChaptersInQuarter(
+            reportingInfo, bookInfo, startingChapter,
+            bookEntry.consultantQuarter, bookEntry.consultantYear, bookEntry.verses)
+          });
       } else {
         console.warn("Warning: " + bookName + " (Consultant Checked) year empty");
 
@@ -285,14 +295,16 @@ export class ExcelProject {
     }
     if (bookEntry.publishQuarter) {
       if (bookEntry.publishYear) {
-        status.publish = this.completedChaptersInQuarter(
-          reportingInfo, bookInfo, startingChapter,
-          bookEntry.publishQuarter, bookEntry.publishYear, bookEntry.verses);
+        statusArray.push(
+          {"publish" : this.completedChaptersInQuarter(
+            reportingInfo, bookInfo, startingChapter,
+            bookEntry.publishQuarter, bookEntry.publishYear, bookEntry.verses)
+          });
       } else {
         console.warn("Warning: " + bookName + " (Published) year empty");
       }
     }
 
-    return status;
+    return statusArray;
   }
 }
