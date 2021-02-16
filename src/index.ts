@@ -6,8 +6,8 @@ import * as path from 'path';
 import * as excelProject from './excelProject';
 import * as paratextProgress from './paratextProgress';
 import { ProjectStatusType } from './status';
-import { Reporting, isQuarter } from './reporting';
-import * as xmlParser from 'xml2json';
+import { Reporting } from './reporting';
+import * as convert from 'xml-js';
 import * as vkbeautify from 'vkbeautify';
 import * as jsonStatus from './jsonStatus';
 const {version} = require('../package.json');
@@ -25,7 +25,6 @@ program
   .option("-x, --xlsm <excelProjectPath>", "path to P&P Excel spreadsheet")
   .option("-j, --json <jsonStatusPath>", "path to JSON status file (named project-quarter-year.json)")
   .option("-p, --project <paratextProjectPath>", "path to the Paratext project")
-  .option("-q, --quarter <quarter>", "If specified, only update Paratext status for the current quarter [Q1, Q2, Q3, Q4]")
   .option("-t, --table", "Export a Paratext project progress into MS Word tables (not implemented yet)")
   .option("-u, --user <name>", "Paratext user name that will be updating the Paratext project status")
   .parse(process.argv);
@@ -44,9 +43,6 @@ if (debugParameters) {
   if (options.project) {
     console.log(`Paratext Project: "${options.project}"`);
   }
-  if (options.quarter) {
-    console.log(`Quarter: "${options.quarter}"`);
-  }
   if (options.table) {
     console.log(`Export progress to MS Word Table`);
   }
@@ -64,13 +60,6 @@ if (options.xlsm && !fs.existsSync(options.xlsm)) {
 if (options.json && !fs.existsSync(options.json)) {
   console.error("Can't open JSON file " + options.json);
   process.exit(1);
-}
-
-if (options.quarter) {
-  if (!isQuarter(options.quarter)) {
-    console.error(`Quarter needs to be one of [Q1, Q2, Q3, Q4]`);
-    process.exit(1);
-  }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -95,7 +84,7 @@ if (options.xlsm) {
 
   // Get the project status from the JSON file
   try {
-    progressObj = jStatus.loadStatus(options.json, reportingInfo);
+    progressObj = jStatus.loadStatus(options.json);
   } catch (e) {
     console.error("Invalid JSON file. Exiting")
     process.exit(1);
@@ -117,7 +106,7 @@ if (options.project) {
 
   // Read existing ProjectProgress.xml into xmlObj which will get updated
   const projectProgressData = fs.readFileSync(projectProgressFilename, 'utf-8');
-  const xmlObj = xmlParser.toJson(projectProgressData, {reversible: true, object: true})
+  const xmlObj = convert.xml2js(projectProgressData, {compact: true})
 
   const p = new paratextProgress.ParatextProgress();
   if (options.table) {
@@ -133,19 +122,20 @@ if (options.project) {
     fs.copyFileSync(projectProgressFilename, projectProgressFilename + ".bak");
 
     // Update Paratext progress
-    p.update(progressObj, xmlObj, options.user, reportingInfo, options.quarter);
+    p.update(progressObj, xmlObj, options.user, reportingInfo);
 
     // Convert xmlObj to XML and beautify before writing
     const xmlOptions = {
-      sanitize: true,
-      ignoreNull: false
+      compact: true,
+      fullTagEmptyElement: false,
+      ignoreComment: true,
+      spaces: 4
     };
-    let updatedData = xmlParser.toXml(xmlObj, xmlOptions);
+    let updatedData = convert.js2xml(xmlObj, xmlOptions);
     updatedData = vkbeautify.xml(updatedData, 2);
 
-    // xmlParser loses the XML tags so prepend when writing back to file
-    const XML_HEADER = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-      fs.writeFileSync(projectProgressFilename, XML_HEADER + updatedData);
-      console.info(`SUCCESS! Project ${reportingInfo.projectName} updates written to ${projectProgressFilename}`);
+    // Write the XML to file
+    fs.writeFileSync(projectProgressFilename, updatedData);
+    console.info(`SUCCESS! Project ${reportingInfo.projectName} updates written to ${projectProgressFilename}`);
   }
 }

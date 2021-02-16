@@ -1,4 +1,4 @@
-// Copyright 2020 SIL International
+// Copyright 2020-2021 SIL International
 // Type for Excel, Word, or Paratext project status that gets saved to JSON.
 // The status from Excel/Word can be used to update a Paratext project.
 // The status from Paratext can be exported to Word table.

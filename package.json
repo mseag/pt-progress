@@ -9,8 +9,7 @@
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "npx tsc -w & nodemon -q -w dist",
-    "copy": "cp ./node_modules/node-expat/build/Release/node_expat.node deploy/",
-    "publish": "npm run-script copy && pkg --out-path deploy/ package.json"
+    "publish": "pkg --out-path deploy/ package.json"
   },
   "repository": {
     "type": "git",
@@ -29,13 +28,12 @@
   "homepage": "https://github.com/mseag/pt-progress#readme",
   "dependencies": {
     "@types/vkbeautify": "^0.99.2",
-    "@types/xml2json": "^0.11.3",
     "commander": "^7.0.0",
     "convert-excel-to-json": "^1.7.0",
     "path": "^0.12.7",
     "vkbeautify": "^0.99.3",
     "xml-formatter": "^2.4.0",
-    "xml2json": "^0.12.0"
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@types/node": "^14.14.28",

@@ -1,4 +1,4 @@
-// Copyright 2020 SIL International
+// Copyright 2020-2021 SIL International
 // Utilities to process Excel spreadsheet and write status to JSON file
 import * as fs from 'fs';
 import * as books from './books';
@@ -109,7 +109,11 @@ export class ExcelProject {
         continue;
       }
 
-      const bookInfo: books.bookType = b.getBookByName(bookName)
+      const bookInfo: books.bookType = b.getBookByName(bookName);
+      if (bookInfo === undefined) {
+        continue;
+      }
+      const code: books.CodeType = bookInfo.code;
       result.Progress[i].startingChapter = 1;
 
       // Special handling for 'verses' field (we need to adjust the starting chapter based on the previous entries)
@@ -132,15 +136,14 @@ export class ExcelProject {
       // the status for each entry gets appended into an array.
       const bookStatus: StatusMap[] = this.parseBookStatus(reportingInfo, result.Progress[i])
       if (bookStatus && bookStatus.length > 0) {
-        let statusArray: StatusMap[] = [];
-        if (bookInfo.code in resultObj) {
-          // Get existing status
-          statusArray = resultObj[bookInfo.code] as StatusMap[];
+        if (!(code in resultObj)) {
+          resultObj[code] = bookStatus;
+        } else if (resultObj && code && resultObj[code]){
+          // Append the book status
+          let statusArray: StatusMap[] = resultObj[code] as StatusMap[];
+          statusArray = statusArray.concat(bookStatus);
+          resultObj[code] = statusArray;
         }
-
-        // Append the book status
-        statusArray = statusArray.concat(bookStatus);
-        resultObj[bookInfo.code] = statusArray;
       }
     }
 
