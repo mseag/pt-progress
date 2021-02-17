@@ -19,6 +19,11 @@ interface projectStatusType {
   }
 }
 
+interface stageStatusType {
+  completed: number[]; // Array to keep track of completed chapters for a book
+  date?: Date;         // completion date
+}
+
 /**
  * Class for handling Paratext project object
  */
@@ -26,13 +31,9 @@ export class ParatextProgress {
 
   /**
    * Allocate 2D array for temporary status of the 66 books and 6 phases
-   * @returns {any} 2D array of type stageStatusType
+   * @returns {stageStatusType[66][6]} 2D array of type stageStatusType
    */
-  private generateWorkingObj(): any {
-    interface stageStatusType {
-      completed: number[];
-      date?: Date;
-    }
+  private generateWorkingObj(): stageStatusType[][] {
     const b = new books.Books;
 
     // 2D array for 66 books x 6 phases each
