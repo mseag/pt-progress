@@ -10,7 +10,7 @@ import { ProjectStatusType, StatusMap, Status } from './status';
  * Information to write for updating Paratext status.
  * Corresponds to the <status> node in ProjectProgress.xml
  */
-interface projectStatusType {
+export interface projectStatusType {
   _attributes: {
     bookChapter: string; // String format is [book number]-[chapter number]
     done: string;        // boolean
