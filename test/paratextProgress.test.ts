@@ -1,37 +1,39 @@
 // Copyright 2021 SIL International
 // Trivial unit test for testing reporting
-const test = require('ava');
+import anyTest, {TestInterface} from 'ava';
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import * as paratextProgress from '../dist/paratextProgress';
 import * as reporting from '../dist/reporting';
 import { ProjectStatusType } from '../dist/status';
-import Reporting from '../src/reporting';
+
+// Reference: https://github.com/avajs/ava/blob/main/docs/recipes/typescript.md#typing-tcontext
+const test = anyTest as TestInterface<{xmlObj: any}>;
 
 test.beforeEach(t => {
   // Empty project progress from "XML" file
-  const xmlString: string = fs.readFileSync(path.join(__dirname, "xmlObj.json"), "utf-8");
+  const xmlString: string = readFileSync(join(__dirname, "xmlObj.json"), "utf-8");
   t.context.xmlObj = JSON.parse(xmlString);
 });
 
-test('getBookChapterNumber()', t => {
+test('paratextProgress.getBookChapterNumber()', t => {
   const p = new paratextProgress.ParatextProgress();
   // OT
-  t.deepEqual(p.getBookChapterNumber("GEN", 50), "1-50");
-  t.deepEqual(p.getBookChapterNumber("MAL", 4), "39-4");
+  t.deepEqual(p.getBookChapterNumber("GEN", 50), "1-50", "Genesis (50 chapters)");
+  t.deepEqual(p.getBookChapterNumber("MAL", 4), "39-4", "Malachi (4 chapters)");
 
   // NT
-  t.deepEqual(p.getBookChapterNumber("MAT", 28), "40-28");
-  t.deepEqual(p.getBookChapterNumber("REV", 22), "66-22");
+  t.deepEqual(p.getBookChapterNumber("MAT", 28), "40-28", "Matthew (28 chapters)");
+  t.deepEqual(p.getBookChapterNumber("REV", 22), "66-22", "Revelation (22 chapters)");
 
   // Placeholder for invalid book
-  t.deepEqual(p.getBookChapterNumber("000", 4), "0-4");
+  t.deepEqual(p.getBookChapterNumber("000", 4), "0-4", "Placeholder book");
 });
 
 test.todo('getBookChapterNumber("INV", "4") is invalid book');
 
-test('update()', t => {
+test('paratextProgress.update()', t => {
   // status from the "JSON" file
   const progressObj: ProjectStatusType = {
     "MRK": [
@@ -49,13 +51,14 @@ test('update()', t => {
   const xmlObj: any = t.context.xmlObj;
   const reportingInfo: reporting.Reporting = new reporting.Reporting(
     "unit-test", "Q1", 2021);
+  const user = "tester";
   const p = new paratextProgress.ParatextProgress();
 
-  // Assert Status doesn't exist
+  // Assert Status doesn't exist yet
   t.deepEqual(xmlObj.ProgressInfo.Stages.Stage[0].Task.Status, undefined);
 
   // "Update" the project
-  p.update(progressObj, xmlObj, "tester", reportingInfo);
+  p.update(progressObj, xmlObj, user, reportingInfo);
 
   // Stage[0] for "exegesis"
   const status = xmlObj.ProgressInfo.Stages.Stage[0].Task.Status;
@@ -63,9 +66,14 @@ test('update()', t => {
 
   // Assert completion
   for(let ch = 0; ch<16; ch++) {
-    t.deepEqual(status[ch]._attributes.bookChapter, "41-" + (ch+1).toString());
-    t.truthy(status[ch]._attributes.done);
-    t.deepEqual(status[ch]._attributes.user, "tester")
-    t.deepEqual(status[ch]._attributes.date, "2020-09-28T09:19:56.0972475+07:00");
+    const expectedStatus: paratextProgress.projectStatusType = {
+      _attributes: {
+        bookChapter: "41-" + (ch+1).toString(),
+        done: 'true',
+        user: user,
+        date: "2020-09-28T09:19:56.0972475+07:00"
+      }
+    }
+    t.deepEqual(status[ch], expectedStatus, "Chapter status doesn't match");
   }
 });
