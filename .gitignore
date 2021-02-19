@@ -2,7 +2,7 @@
 node_modules/
 
 # Sample Office docs for testing
-test/
+reports/
 
 # Compiled Output files
 dist/

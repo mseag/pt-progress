@@ -20,6 +20,19 @@
         //"-p", "C:\\My Paratext 9 Projects\\MEP"
         "-p", "C:\\My Paratext 9 Projects\\PTP_test"
       ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug AVA test file",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/ava",
+      "runtimeArgs": [
+        "${file}"
+      ],
+      "outputCapture": "std",
+      "skipFiles" : [
+        "<node_internals>/**/*.js"
+      ]
     }
   ]
 }

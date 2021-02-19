@@ -2,7 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as reporting from './reporting';
-import {ProjectStatusType, StatusMap, Status} from "./status";
+import {ProjectStatusType} from "./status";
 
 export class JsonStatus {
   public JSON_EXTENSION = ".json";
