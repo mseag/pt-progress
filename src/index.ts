@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S npx ts-node
 // Copyright 2020-2021 SIL International
 import * as program from 'commander';
 import * as fs from 'fs';
