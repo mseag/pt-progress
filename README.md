@@ -147,12 +147,12 @@ This compiles the TypeScript source files in `src/` into Javascript (`dist/`)
 
 To rebuild the project
 ```bash
-npm run-script build
+npm run build
 ```
 
 You can also have TypeScript watch the project and recompile automatically
 ```bash
-npm run-script watch
+npm run watch
 ```
 
 ### Debugging with Visual Studio Code
@@ -164,10 +164,16 @@ Edit your applicable parameters in [launch.json](./.vscode/launch.json). If usin
 This optional step creates a standalone Windows executable `pt-progress.exe` so it can be run without Node.js. Published artifacts will be in the `deploy/` directory.
 
 ```bash
-npm run-script publish
+npm run publish
 ```
 
-This copies the required `node_expat.node` file that must be distributed with the generated executable `pt-progress.exe`.
+## Unit Tests
+Unit tests are run with the [AVA](https://github.com/avajs/ava) test runner.
+Remember to build pt-progress before running tests. 
+Terminal output best viewed in VS Code.
+```bash
+npm run test
+```
 
 -------------
 
